@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Dashboard - iLearn</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <img src="../assets/logo.svg" alt="iLearn Logo" />
+          <span>iLearn</span>
+        </div>
+        <nav class="sidebar-nav">
+          <a href="#" class="active">
+            <i class="icon-dashboard"></i>
+            Dashboard
+          </a>
+          <a href="#courses">
+            <i class="icon-courses"></i>
+            My Courses
+          </a>
+          <a href="#certificates">
+            <i class="icon-certificate"></i>
+            Certificates
+          </a>
+          <a href="#profile">
+            <i class="icon-profile"></i>
+            Profile
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="dashboard-main">
+        <!-- Top Navigation -->
+        <header class="dashboard-header">
+          <div class="header-search">
+            <input type="search" placeholder="Search courses..." />
+          </div>
+          <div class="header-user">
+            <div class="notifications">
+              <i class="icon-bell"></i>
+              <span class="badge">2</span>
+            </div>
+            <div class="user-profile">
+              <img src="../assets/avatar.jpg" alt="User Avatar" />
+              <span class="user-name">John Doe</span>
+            </div>
+          </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+          <!-- Progress Overview -->
+          <section class="content-section">
+            <h2>Learning Progress</h2>
+            <div class="grid grid-cols-3 gap-4">
+              <div class="stat-card">
+                <h3>Courses in Progress</h3>
+                <p class="stat-number">4</p>
+              </div>
+              <div class="stat-card">
+                <h3>Completed Courses</h3>
+                <p class="stat-number">6</p>
+              </div>
+              <div class="stat-card">
+                <h3>Certificates Earned</h3>
+                <p class="stat-number">5</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Current Courses -->
+          <section class="content-section">
+            <h2>Current Courses</h2>
+            <div class="course-grid">
+              <!-- Course cards will be dynamically populated -->
+            </div>
+          </section>
+
+          <!-- Recent Activities -->
+          <section class="content-section">
+            <h2>Recent Activities</h2>
+            <div class="activity-list">
+              <!-- Activities will be dynamically populated -->
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-auth-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-database-compat.min.js"></script>
+    <script src="../js/firebase.js"></script>
+    <script src="../js/dashboard.js"></script>
+  </body>
+</html>

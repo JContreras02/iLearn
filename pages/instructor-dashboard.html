@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instructor Dashboard - iLearn</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <img src="../assets/logo.png" alt="iLearn Logo" />
+          <span>iLearn</span>
+        </div>
+        <nav class="sidebar-nav">
+          <a href="#" class="active">
+            <i class="icon-dashboard"></i>
+            Dashboard
+          </a>
+          <a href="#courses">
+            <i class="icon-courses"></i>
+            My Courses
+          </a>
+          <a href="#students">
+            <i class="icon-users"></i>
+            Students
+          </a>
+          <a href="#analytics">
+            <i class="icon-analytics"></i>
+            Analytics
+          </a>
+          <a href="#earnings">
+            <i class="icon-wallet"></i>
+            Earnings
+          </a>
+          <a href="#profile">
+            <i class="icon-profile"></i>
+            Profile
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="dashboard-main">
+        <!-- Top Navigation -->
+        <header class="dashboard-header">
+          <div class="header-search">
+            <input type="search" placeholder="Search courses..." />
+          </div>
+          <div class="header-actions">
+            <button class="btn-primary" id="createCourse">
+              <i class="icon-plus"></i>
+              Create Course
+            </button>
+            <div class="notifications">
+              <i class="icon-bell"></i>
+              <span class="badge">3</span>
+            </div>
+            <div class="user-profile">
+              <img src="../assets/avatar.jpg" alt="Instructor Avatar" />
+              <span class="user-name">John Doe</span>
+            </div>
+          </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+          <!-- Statistics Overview -->
+          <section class="content-section">
+            <h2>Overview</h2>
+            <div class="grid grid-cols-4 gap-4">
+              <div class="stat-card">
+                <h3>Total Students</h3>
+                <p class="stat-number">1,234</p>
+              </div>
+              <div class="stat-card">
+                <h3>Active Courses</h3>
+                <p class="stat-number">12</p>
+              </div>
+              <div class="stat-card">
+                <h3>Total Earnings</h3>
+                <p class="stat-number">$15,678</p>
+              </div>
+              <div class="stat-card">
+                <h3>Average Rating</h3>
+                <p class="stat-number">4.8</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Course Management -->
+          <section class="content-section">
+            <div class="section-header">
+              <h2>Your Courses</h2>
+              <div class="section-actions">
+                <select class="filter-select">
+                  <option value="all">All Courses</option>
+                  <option value="published">Published</option>
+                  <option value="draft">Draft</option>
+                </select>
+              </div>
+            </div>
+            <div class="course-grid" id="courseGrid">
+              <!-- Courses will be dynamically populated -->
+            </div>
+          </section>
+
+          <!-- Recent Activities -->
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Student Activities -->
+            <section class="content-section">
+              <h2>Recent Student Activities</h2>
+              <div class="activity-list">
+                <!-- Student activities will be dynamically populated -->
+              </div>
+            </section>
+
+            <!-- Course Analytics -->
+            <section class="content-section">
+              <h2>Course Analytics</h2>
+              <div class="analytics-chart">
+                <!-- Chart will be dynamically populated -->
+                <canvas id="courseAnalytics"></canvas>
+              </div>
+            </section>
+          </div>
+
+          <!-- Recent Reviews -->
+          <section class="content-section">
+            <h2>Recent Reviews</h2>
+            <div class="review-list">
+              <!-- Reviews will be dynamically populated -->
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <!-- Course Creation Modal -->
+    <div class="modal-overlay" id="courseModal" style="display: none">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Create New Course</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="courseForm">
+            <div class="form-group">
+              <label for="courseTitle">Course Title</label>
+              <input type="text" id="courseTitle" required />
+            </div>
+            <div class="form-group">
+              <label for="courseDescription">Description</label>
+              <textarea id="courseDescription" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="courseCategory">Category</label>
+              <select id="courseCategory" required>
+                <option value="">Select Category</option>
+                <option value="development">Development</option>
+                <option value="business">Business</option>
+                <option value="design">Design</option>
+                <option value="marketing">Marketing</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="coursePrice">Price ($)</label>
+              <input
+                type="number"
+                id="coursePrice"
+                min="0"
+                step="0.01"
+                required
+              />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" data-dismiss="modal">Cancel</button>
+          <button class="btn-primary" id="saveCourse">Create Course</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-auth-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-database-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-storage-compat.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../js/firebase.js"></script>
+    <script src="../js/instructor-dashboard.js"></script>
+  </body>
+</html>

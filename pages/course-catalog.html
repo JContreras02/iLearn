@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Course Catalog - iLearn</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/catalog.css" />
+  </head>
+  <body>
+    <header class="main-header">
+      <nav class="navbar">
+        <div class="logo">
+          <img src="../assets/logo.png" alt="iLearn Logo" />
+          <span>iLearn</span>
+        </div>
+        <div class="search-bar">
+          <input
+            type="search"
+            id="courseSearch"
+            placeholder="Search courses..."
+          />
+          <button class="search-btn">
+            <i class="icon-search"></i>
+          </button>
+        </div>
+        <div class="nav-links">
+          <a href="dashboard.html">Dashboard</a>
+          <div class="user-menu">
+            <img
+              src="../assets/avatar.jpg"
+              alt="User Avatar"
+              class="user-avatar"
+            />
+            <div class="dropdown-menu">
+              <a href="profile.html">Profile</a>
+              <a href="my-courses.html">My Courses</a>
+              <a href="#" id="logoutBtn">Logout</a>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="catalog-container">
+      <!-- Filters Sidebar -->
+      <aside class="filters-sidebar">
+        <div class="filter-section">
+          <h3>Categories</h3>
+          <div class="filter-options" id="categoryFilters">
+            <!-- Categories will be dynamically populated -->
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <h3>Level</h3>
+          <div class="filter-options">
+            <label class="checkbox-container">
+              <input type="checkbox" value="beginner" />
+              Beginner
+            </label>
+            <label class="checkbox-container">
+              <input type="checkbox" value="intermediate" />
+              Intermediate
+            </label>
+            <label class="checkbox-container">
+              <input type="checkbox" value="advanced" />
+              Advanced
+            </label>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <h3>Duration</h3>
+          <div class="filter-options">
+            <label class="checkbox-container">
+              <input type="checkbox" value="0-2" />
+              0-2 hours
+            </label>
+            <label class="checkbox-container">
+              <input type="checkbox" value="2-5" />
+              2-5 hours
+            </label>
+            <label class="checkbox-container">
+              <input type="checkbox" value="5+" />
+              5+ hours
+            </label>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <h3>Rating</h3>
+          <div class="filter-options">
+            <div class="rating-slider">
+              <input
+                type="range"
+                min="0"
+                max="5"
+                step="0.5"
+                value="0"
+                id="ratingFilter"
+              />
+              <span class="rating-value">0+</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="applyFilters">Apply Filters</button>
+        <button class="btn-secondary" id="resetFilters">Reset Filters</button>
+      </aside>
+
+      <!-- Course Grid -->
+      <section class="course-grid-container">
+        <div class="grid-header">
+          <h2>Available Courses</h2>
+          <div class="grid-controls">
+            <select id="sortCourses">
+              <option value="popular">Most Popular</option>
+              <option value="newest">Newest</option>
+              <option value="rating">Highest Rated</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+            </select>
+            <div class="view-toggle">
+              <button class="active" data-view="grid">
+                <i class="icon-grid"></i>
+              </button>
+              <button data-view="list">
+                <i class="icon-list"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="course-grid" id="courseGrid">
+          <!-- Courses will be dynamically populated -->
+        </div>
+
+        <div class="pagination">
+          <button class="btn-page" disabled>&lt;</button>
+          <span class="page-numbers">
+            <button class="btn-page active">1</button>
+            <button class="btn-page">2</button>
+            <button class="btn-page">3</button>
+          </span>
+          <button class="btn-page">&gt;</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Course Preview Modal -->
+    <div class="modal-overlay" id="coursePreviewModal" style="display: none">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Course Preview</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <!-- Course preview content will be dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+    <footer class="main-footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>About iLearn</h4>
+          <p>World-class education for everyone, anywhere</p>
+        </div>
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Contact Us</h4>
+          <ul>
+            <li><a href="#">Support</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Partnership</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 iLearn. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <!-- Firebase Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-auth-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-database-compat.min.js"></script>
+    <script src="../js/firebase.js"></script>
+    <script src="../js/catalog.js"></script>
+  </body>
+</html>
