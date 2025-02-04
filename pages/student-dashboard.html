@@ -4,101 +4,241 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Student Dashboard - iLearn</title>
-    <link rel="stylesheet" href="../css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
     <link rel="stylesheet" href="../css/dashboard.css" />
   </head>
   <body>
-    <div class="dashboard-container">
-      <!-- Sidebar -->
-      <aside class="sidebar">
-        <div class="sidebar-header">
-          <img src="../assets/logo.svg" alt="iLearn Logo" />
-          <span>iLearn</span>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="nav-left">
+        <a href="#" class="nav-brand">iLearn</a>
+      </div>
+      <div class="nav-center">
+        <a href="#" class="nav-link active">Dashboard</a>
+        <a href="#" class="nav-link">My Courses</a>
+        <a href="#" class="nav-link">Messages</a>
+      </div>
+      <div class="nav-right">
+        <div class="user-profile" id="userInitials"></div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <!-- Welcome Section -->
+      <div class="card welcome-card">
+        <h1>Welcome back, <span id="userName">Student</span>!</h1>
+        <p>Let's continue learning!</p>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Courses in Progress</h3>
+          <div class="stat-value" id="coursesInProgress">0</div>
+          <a href="#" class="stat-link">View all courses</a>
         </div>
-        <nav class="sidebar-nav">
-          <a href="#" class="active">
-            <i class="icon-dashboard"></i>
-            Dashboard
-          </a>
-          <a href="#courses">
-            <i class="icon-courses"></i>
-            My Courses
-          </a>
-          <a href="#certificates">
-            <i class="icon-certificate"></i>
-            Certificates
-          </a>
-          <a href="#profile">
-            <i class="icon-profile"></i>
-            Profile
-          </a>
-        </nav>
-      </aside>
-
-      <!-- Main Content -->
-      <main class="dashboard-main">
-        <!-- Top Navigation -->
-        <header class="dashboard-header">
-          <div class="header-search">
-            <input type="search" placeholder="Search courses..." />
-          </div>
-          <div class="header-user">
-            <div class="notifications">
-              <i class="icon-bell"></i>
-              <span class="badge">2</span>
-            </div>
-            <div class="user-profile">
-              <img src="../assets/avatar.jpg" alt="User Avatar" />
-              <span class="user-name">John Doe</span>
-            </div>
-          </div>
-        </header>
-
-        <!-- Dashboard Content -->
-        <div class="dashboard-content">
-          <!-- Progress Overview -->
-          <section class="content-section">
-            <h2>Learning Progress</h2>
-            <div class="grid grid-cols-3 gap-4">
-              <div class="stat-card">
-                <h3>Courses in Progress</h3>
-                <p class="stat-number">4</p>
-              </div>
-              <div class="stat-card">
-                <h3>Completed Courses</h3>
-                <p class="stat-number">6</p>
-              </div>
-              <div class="stat-card">
-                <h3>Certificates Earned</h3>
-                <p class="stat-number">5</p>
-              </div>
-            </div>
-          </section>
-
-          <!-- Current Courses -->
-          <section class="content-section">
-            <h2>Current Courses</h2>
-            <div class="course-grid">
-              <!-- Course cards will be dynamically populated -->
-            </div>
-          </section>
-
-          <!-- Recent Activities -->
-          <section class="content-section">
-            <h2>Recent Activities</h2>
-            <div class="activity-list">
-              <!-- Activities will be dynamically populated -->
-            </div>
-          </section>
+        <div class="stat-card">
+          <h3>Completed Courses</h3>
+          <div class="stat-value" id="completedCourses">0</div>
+          <a href="#" class="stat-link">View certificates</a>
         </div>
-      </main>
+        <div class="stat-card">
+          <h3>Hours Learned</h3>
+          <div class="stat-value" id="hoursLearned">0</div>
+          <span class="stat-subtitle">This month</span>
+        </div>
+        <div class="stat-card">
+          <h3>Average Score</h3>
+          <div class="stat-value" id="averageScore">0%</div>
+          <span class="stat-subtitle">Based on assignments</span>
+        </div>
+      </div>
+
+      <!-- Current Courses Section -->
+      <section class="section">
+        <h2>Current Courses</h2>
+        <div class="courses-grid" id="currentCourses">
+          <!-- Courses will be dynamically loaded -->
+        </div>
+      </section>
+
+      <!-- Two Column Layout -->
+      <div class="two-column-grid">
+        <!-- Upcoming Deadlines -->
+        <section class="section">
+          <h2>Upcoming Deadlines</h2>
+          <div class="deadlines-list" id="deadlinesList">
+            <!-- Deadlines will be dynamically loaded -->
+          </div>
+        </section>
+
+        <!-- Notifications -->
+        <section class="section">
+          <h2>Notifications</h2>
+          <div class="notifications-list" id="notificationsList">
+            <!-- Notifications will be dynamically loaded -->
+          </div>
+        </section>
+      </div>
+
+      <!-- Recent Activity -->
+      <section class="section">
+        <h2>Recent Activity</h2>
+        <div class="activity-list" id="activityList">
+          <!-- Activities will be dynamically loaded -->
+        </div>
+      </section>
     </div>
 
-    <!-- Firebase Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-app-compat.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-auth-compat.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-database-compat.min.js"></script>
-    <script src="../js/firebase.js"></script>
-    <script src="../js/dashboard.js"></script>
+    <!-- Scripts -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+      import {
+        getDatabase,
+        ref,
+        onValue,
+      } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+
+      // Firebase configuration
+      const firebaseConfig = {
+        // Your existing config
+        apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+        authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+        databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
+        projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+        storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+        appId: process.env.REACT_APP_FIREBASE_APP_ID,
+        measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const database = getDatabase(app);
+
+      // Handle Auth State Changes
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          // User is signed in
+          const userRef = ref(database, `users/${user.uid}`);
+          onValue(userRef, (snapshot) => {
+            const userData = snapshot.val();
+            if (userData) {
+              // Update user name
+              document.getElementById("userName").textContent = userData.name;
+
+              // Update user initials
+              const initials = userData.name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase();
+              document.getElementById("userInitials").textContent = initials;
+
+              // Load user's dashboard data
+              loadDashboardData(user.uid);
+            }
+          });
+        } else {
+          // User is signed out
+          window.location.href = "login.html";
+        }
+      });
+
+      // Load Dashboard Data
+      async function loadDashboardData(userId) {
+        try {
+          // Load courses
+          const coursesRef = ref(database, `enrollments/${userId}`);
+          onValue(coursesRef, (snapshot) => {
+            const courses = snapshot.val() || {};
+            updateCourseStats(courses);
+            displayCurrentCourses(courses);
+          });
+
+          // Load deadlines
+          const deadlinesRef = ref(database, `deadlines/${userId}`);
+          onValue(deadlinesRef, (snapshot) => {
+            const deadlines = snapshot.val() || {};
+            displayDeadlines(deadlines);
+          });
+
+          // Load activities
+          const activitiesRef = ref(database, `activities/${userId}`);
+          onValue(activitiesRef, (snapshot) => {
+            const activities = snapshot.val() || {};
+            displayActivities(activities);
+          });
+        } catch (error) {
+          console.error("Error loading dashboard data:", error);
+          showError("Failed to load dashboard data");
+        }
+      }
+
+      // Utility function to show error messages
+      function showError(message) {
+        const errorDiv = document.createElement("div");
+        errorDiv.className = "error-message";
+        errorDiv.textContent = message;
+        document.querySelector(".container").prepend(errorDiv);
+        setTimeout(() => errorDiv.remove(), 5000);
+      }
+
+      // Implement the remaining functions for updating the UI
+      function updateCourseStats(courses) {
+        // Calculate and update stats
+        const stats = calculateCourseStats(courses);
+        document.getElementById("coursesInProgress").textContent =
+          stats.inProgress;
+        document.getElementById("completedCourses").textContent =
+          stats.completed;
+        document.getElementById("hoursLearned").textContent =
+          stats.hoursLearned;
+        document.getElementById(
+          "averageScore"
+        ).textContent = `${stats.averageScore}%`;
+      }
+
+      function calculateCourseStats(courses) {
+        // Implement course statistics calculation
+        return {
+          inProgress: 0,
+          completed: 0,
+          hoursLearned: 0,
+          averageScore: 0,
+        };
+      }
+
+      function displayCurrentCourses(courses) {
+        // Implement courses display logic
+        const coursesContainer = document.getElementById("currentCourses");
+        coursesContainer.innerHTML =
+          '<p class="empty-state">No courses yet</p>';
+      }
+
+      function displayDeadlines(deadlines) {
+        // Implement deadlines display logic
+        const deadlinesList = document.getElementById("deadlinesList");
+        deadlinesList.innerHTML =
+          '<p class="empty-state">No upcoming deadlines</p>';
+      }
+
+      function displayActivities(activities) {
+        // Implement activities display logic
+        const activityList = document.getElementById("activityList");
+        activityList.innerHTML =
+          '<p class="empty-state">No recent activities</p>';
+      }
+    </script>
   </body>
 </html>

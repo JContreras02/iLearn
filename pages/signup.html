@@ -36,16 +36,6 @@
           </div>
 
           <div class="form-group">
-            <label for="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              required
-            />
-          </div>
-
-          <div class="form-group">
             <label>Account Type</label>
             <div class="radio-group">
               <label class="radio-container">
@@ -65,8 +55,8 @@
             <label class="checkbox-container">
               <input type="checkbox" id="terms" required />
               <span class="checkmark"></span>
-              I agree to the <a href="./terms.html">Terms of Service</a> and
-              <a href="./privacy.html">Privacy Policy</a>
+              I agree to the <a href="#terms">Terms of Service</a> and
+              <a href="#privacy">Privacy Policy</a>
             </label>
           </div>
 
@@ -77,7 +67,7 @@
           </div>
 
           <div class="social-auth">
-            <button type="button" class="btn-social" id="googleSignup">
+            <button type="button" class="btn-social" id="googleLogin">
               <img src="../assets/google-icon.png" alt="Google" />
               Google
             </button>
@@ -91,9 +81,110 @@
     </div>
 
     <!-- Firebase Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-app-compat.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-auth-compat.min.js"></script>
-    <script src="../js/firebase.js"></script>
-    <script src="../js/auth.js"></script>
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+      import {
+        getAuth,
+        GoogleAuthProvider,
+        createUserWithEmailAndPassword,
+        signInWithPopup,
+      } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+      import {
+        getDatabase,
+        ref,
+        set,
+      } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        // Your existing config
+        apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+        authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+        databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
+        projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+        storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+        appId: process.env.REACT_APP_FIREBASE_APP_ID,
+        measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const database = getDatabase(app);
+      const googleProvider = new GoogleAuthProvider();
+
+      // Handle form submission
+      const signupForm = document.getElementById("signupForm");
+      signupForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const name = document.getElementById("name").value;
+        const role = document.querySelector('input[name="role"]:checked').value;
+
+        try {
+          const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+          );
+          const user = userCredential.user;
+
+          // Save user data to database
+          await set(ref(database, "users/" + user.uid), {
+            name: name,
+            email: email,
+            role: role,
+            createdAt: new Date().toISOString(),
+          });
+
+          // Redirect based on role
+          window.location.href =
+            role === "instructor"
+              ? "instructor-dashboard.html"
+              : "student-dashboard.html";
+        } catch (error) {
+          showError(error.message);
+        }
+      });
+
+      // Handle Google Sign In
+      const googleBtn = document.getElementById("googleLogin");
+      googleBtn.addEventListener("click", async () => {
+        try {
+          const result = await signInWithPopup(auth, googleProvider);
+          const user = result.user;
+
+          // Save user data if new user
+          if (result.additionalUserInfo.isNewUser) {
+            await set(ref(database, "users/" + user.uid), {
+              name: user.displayName,
+              email: user.email,
+              role: "student", // Default role for Google sign-in
+              photoURL: user.photoURL,
+              createdAt: new Date().toISOString(),
+            });
+          }
+
+          // Redirect to student dashboard (default for Google sign-in)
+          window.location.href = "student-dashboard.html";
+        } catch (error) {
+          showError(error.message);
+        }
+      });
+
+      function showError(message) {
+        const errorDiv = document.createElement("div");
+        errorDiv.className = "alert alert-error";
+        errorDiv.textContent = message;
+        signupForm.insertBefore(errorDiv, signupForm.firstChild);
+        setTimeout(() => errorDiv.remove(), 5000);
+      }
+    </script>
+    <script type="module" src="../js/firebase.js"></script>
+    <script type="module" src="../js/auth.js"></script>
+    <script type="module" src="../js/dashboard.js"></script>
   </body>
 </html>

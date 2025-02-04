@@ -1,257 +1,416 @@
-// Initialize Firebase Auth and Database
-const auth = firebase.auth();
-const database = firebase.database();
+import { auth, database } from './firebase.js';
+import { ref, onValue, get } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 
-// DOM Elements
-const courseGrid = document.querySelector('.course-grid');
-const activityList = document.querySelector('.activity-list');
-const userNameElement = document.querySelector('.user-name');
-const userAvatar = document.querySelector('.user-profile img');
-
-// Check Authentication State
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        // User is signed in
-        loadUserData(user);
-        loadUserCourses(user.uid);
-        loadUserActivities(user.uid);
-    } else {
-        // No user is signed in, redirect to login
-        window.location.href = 'login.html';
+class DashboardManager {
+    constructor() {
+        this.initializeElements();
+        this.setupEventListeners();
+        this.loadDashboard();
     }
-});
 
-// Load User Data
-async function loadUserData(user) {
-    try {
-        const userRef = database.ref(`users/${user.uid}`);
-        const snapshot = await userRef.once('value');
-        const userData = snapshot.val();
+    initializeElements() {
+        // Profile elements
+        this.profileName = document.getElementById('profileName');
+        this.welcomeName = document.getElementById('welcomeName');
+        this.profileImage = document.getElementById('profileImage');
 
-        if (userData) {
-            userNameElement.textContent = userData.name || 'Student';
-            if (userData.photoURL) {
-                userAvatar.src = userData.photoURL;
+        // Stats elements
+        this.inProgressCount = document.getElementById('inProgressCount');
+        this.completedCount = document.getElementById('completedCount');
+        this.hoursCount = document.getElementById('hoursCount');
+        this.averageScore = document.getElementById('averageScore');
+
+        // Content containers
+        this.coursesGrid = document.getElementById('coursesGrid');
+        this.deadlinesList = document.getElementById('deadlinesList');
+        this.activitiesList = document.getElementById('activitiesList');
+
+        // Logout button
+        this.logoutBtn = document.getElementById('logoutBtn');
+    }
+
+    setupEventListeners() {
+        // Handle logout
+        this.logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await signOut(auth);
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Error signing out:', error);
+                this.showError('Failed to sign out');
             }
-            updateStatistics(userData);
-        }
-    } catch (error) {
-        console.error('Error loading user data:', error);
-        showError('Failed to load user data');
-    }
-}
+        });
 
-// Load User's Courses
-async function loadUserCourses(userId) {
-    try {
-        const enrollmentsRef = database.ref(`enrollments/${userId}`);
-        const snapshot = await enrollmentsRef.once('value');
-        const enrollments = snapshot.val() || {};
+        // Profile dropdown toggle
+        document.getElementById('profileBtn').addEventListener('click', () => {
+            document.getElementById('profileDropdown').classList.toggle('show');
+        });
 
-        courseGrid.innerHTML = ''; // Clear existing courses
-
-        for (const courseId in enrollments) {
-            const courseRef = database.ref(`courses/${courseId}`);
-            const courseSnapshot = await courseRef.once('value');
-            const courseData = courseSnapshot.val();
-
-            if (courseData) {
-                const progress = enrollments[courseId].progress || 0;
-                addCourseCard(courseData, progress);
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.matches('.profile-btn')) {
+                const dropdown = document.getElementById('profileDropdown');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
             }
-        }
-    } catch (error) {
-        console.error('Error loading courses:', error);
-        showError('Failed to load courses');
+        });
     }
-}
 
-// Create Course Card
-function addCourseCard(course, progress) {
-    const card = document.createElement('div');
-    card.className = 'course-card';
-    card.innerHTML = `
-        <img src="${course.thumbnail || '../assets/course-placeholder.jpg'}" alt="${course.title}">
-        <div class="course-info">
-            <h3>${course.title}</h3>
-            <p>${course.instructor}</p>
-            <div class="course-progress">
-                <div class="progress-text">
-                    <span>Progress</span>
-                    <span>${progress}%</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-value" style="width: ${progress}%"></div>
-                </div>
-            </div>
-            <a href="course.html?id=${course.id}" class="btn-primary mt-3">Continue Learning</a>
-        </div>
-    `;
-    courseGrid.appendChild(card);
-}
+    async loadDashboard() {
+        const user = auth.currentUser;
+        if (!user) return;
 
-// Load User Activities
-async function loadUserActivities(userId) {
-    try {
-        const activitiesRef = database.ref(`activities/${userId}`).orderByChild('timestamp').limitToLast(5);
-        const snapshot = await activitiesRef.once('value');
-        const activities = snapshot.val() || {};
-
-        activityList.innerHTML = ''; // Clear existing activities
-
-        Object.entries(activities)
-            .sort((a, b) => b[1].timestamp - a[1].timestamp)
-            .forEach(([id, activity]) => {
-                addActivityItem(activity);
+        try {
+            // Load user data
+            const userRef = ref(database, `users/${user.uid}`);
+            onValue(userRef, (snapshot) => {
+                const userData = snapshot.val();
+                if (userData) {
+                    this.updateUserInfo(userData);
+                }
             });
-    } catch (error) {
-        console.error('Error loading activities:', error);
-        showError('Failed to load activities');
-    }
-}
 
-// Create Activity Item
-function addActivityItem(activity) {
-    const item = document.createElement('div');
-    item.className = 'activity-item';
-    item.innerHTML = `
-        <div class="activity-icon">
-            <i class="icon-${activity.type}"></i>
-        </div>
-        <div class="activity-content">
-            <p>${activity.description}</p>
-            <span class="activity-time">${formatTimestamp(activity.timestamp)}</span>
-        </div>
-    `;
-    activityList.appendChild(item);
-}
+            // Load courses
+            this.loadCourses(user.uid);
 
-// Update Statistics
-function updateStatistics(userData) {
-    const statsRef = database.ref(`statistics/${userData.uid}`);
-    statsRef.once('value').then((snapshot) => {
-        const stats = snapshot.val() || {};
-        
-        document.querySelector('.stat-card:nth-child(1) .stat-number')
-            .textContent = stats.coursesInProgress || 0;
-        document.querySelector('.stat-card:nth-child(2) .stat-number')
-            .textContent = stats.completedCourses || 0;
-        document.querySelector('.stat-card:nth-child(3) .stat-number')
-            .textContent = stats.certificatesEarned || 0;
-    });
-}
+            // Load deadlines
+            this.loadDeadlines(user.uid);
 
-// Utility Functions
-function formatTimestamp(timestamp) {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diff = now - date;
+            // Load activities
+            this.loadActivities(user.uid);
 
-    if (diff < 60000) { // Less than 1 minute
-        return 'Just now';
-    } else if (diff < 3600000) { // Less than 1 hour
-        const minutes = Math.floor(diff / 60000);
-        return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    } else if (diff < 86400000) { // Less than 1 day
-        const hours = Math.floor(diff / 3600000);
-        return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    } else {
-        return date.toLocaleDateString();
-    }
-}
-
-function showError(message) {
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'alert alert-error';
-    errorDiv.textContent = message;
-    
-    const container = document.querySelector('.dashboard-content');
-    container.insertBefore(errorDiv, container.firstChild);
-    
-    setTimeout(() => errorDiv.remove(), 5000);
-}
-
-// Mobile Navigation Toggle
-const mobileNavToggle = document.createElement('button');
-mobileNavToggle.className = 'mobile-nav-toggle';
-mobileNavToggle.innerHTML = '<i class="icon-menu"></i>';
-document.body.appendChild(mobileNavToggle);
-
-mobileNavToggle.addEventListener('click', () => {
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.toggle('active');
-});
-
-// Search Functionality
-const searchInput = document.querySelector('.header-search input');
-searchInput.addEventListener('input', debounce(handleSearch, 300));
-
-function handleSearch(event) {
-    const searchTerm = event.target.value.toLowerCase();
-    const courseCards = document.querySelectorAll('.course-card');
-
-    courseCards.forEach(card => {
-        const title = card.querySelector('h3').textContent.toLowerCase();
-        const instructor = card.querySelector('p').textContent.toLowerCase();
-        
-        if (title.includes(searchTerm) || instructor.includes(searchTerm)) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
+        } catch (error) {
+            console.error('Error loading dashboard:', error);
+            this.showError('Failed to load dashboard data');
         }
-    });
-}
+    }
 
-// Debounce Function
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Initialize Notifications
-const notificationsIcon = document.querySelector('.notifications');
-notificationsIcon.addEventListener('click', () => {
-    // Implementation for notifications panel
-    console.log('Notifications clicked');
-});
-
-// Handle Profile Click
-const userProfile = document.querySelector('.user-profile');
-userProfile.addEventListener('click', () => {
-    // Implementation for profile menu
-    console.log('Profile clicked');
-});
-
-// Listen for real-time updates
-function setupRealtimeListeners(userId) {
-    // Listen for new activities
-    database.ref(`activities/${userId}`).on('child_added', (snapshot) => {
-        const activity = snapshot.val();
-        addActivityItem(activity);
-    });
-
-    // Listen for course progress updates
-    database.ref(`enrollments/${userId}`).on('child_changed', (snapshot) => {
-        const enrollment = snapshot.val();
-        const courseId = snapshot.key;
-        updateCourseProgress(courseId, enrollment.progress);
-    });
-}
-
-function updateCourseProgress(courseId, progress) {
-    const courseCard = document.querySelector(`[data-course-id="${courseId}"]`);
-    if (courseCard) {
-        const progressBar = courseCard.querySelector('.progress-value');
-        const progressText = courseCard.querySelector('.progress-text span:last-child');
+    updateUserInfo(userData) {
+        // Update profile display
+        this.profileName.textContent = userData.name;
+        this.welcomeName.textContent = userData.name.split(' ')[0];
         
-        progressBar.style.width = `${progress}%`;
-        progressText.textContent = `${progress}%`;
+        if (userData.photoURL) {
+            this.profileImage.src = userData.photoURL;
+        }
+    }
+
+    async loadCourses(userId) {
+        const enrollmentsRef = ref(database, `enrollments/${userId}`);
+        
+        onValue(enrollmentsRef, async (snapshot) => {
+            const enrollments = snapshot.val() || {};
+            this.coursesGrid.innerHTML = ''; // Clear existing content
+
+            // Update stats
+            let inProgress = 0;
+            let completed = 0;
+            let totalHours = 0;
+
+            for (const [courseId, enrollment] of Object.entries(enrollments)) {
+                try {
+                    const courseSnapshot = await get(ref(database, `courses/${courseId}`));
+                    const courseData = courseSnapshot.val();
+
+                    if (courseData) {
+                        // Update stats
+                        if (enrollment.completed) {
+                            completed++;
+                            totalHours += courseData.duration || 0;
+                        } else {
+                            inProgress++;
+                        }
+
+                        // Create course card
+                        this.createCourseCard(courseData, enrollment);
+                    }
+                } catch (error) {
+                    console.error(`Error loading course ${courseId}:`, error);
+                }
+            }
+
+            // Update stats display
+            this.updateStats(inProgress, completed, totalHours);
+        });
+    }
+
+    createCourseCard(course, enrollment) {
+        const card = document.createElement('div');
+        card.className = 'course-card';
+        card.innerHTML = `
+            <img src="${course.thumbnail || '../assets/course-placeholder.jpg'}" 
+                 alt="${course.title}" 
+                 class="course-image">
+            <div class="course-content">
+                <h3 class="course-title">${course.title}</h3>
+                <div class="progress-bar">
+                    <div class="progress" style="width: ${enrollment.progress || 0}%"></div>
+                </div>
+                <p>Progress: ${enrollment.progress || 0}%</p>
+                <button class="btn btn-primary mt-2">Continue</button>
+            </div>
+        `;
+
+        this.coursesGrid.appendChild(card);
+    }
+
+    loadDeadlines(userId) {
+        const deadlinesRef = ref(database, `deadlines/${userId}`);
+        
+        onValue(deadlinesRef, (snapshot) => {
+            const deadlines = snapshot.val() || {};
+            this.deadlinesList.innerHTML = ''; // Clear existing content
+
+            Object.entries(deadlines)
+                .sort(([, a], [, b]) => new Date(a.dueDate) - new Date(b.dueDate))
+                .forEach(([id, deadline]) => {
+                    const deadlineEl = this.createDeadlineElement(deadline);
+                    this.deadlinesList.appendChild(deadlineEl);
+                });
+        });
+    }
+
+    createDeadlineElement(deadline) {
+        const element = document.createElement('div');
+        element.className = 'deadline-item';
+        element.innerHTML = `
+            <h4>${deadline.title}</h4>
+            <p>Due ${this.formatDate(deadline.dueDate)} • ${deadline.courseName}</p>
+        `;
+        return element;
+    }
+
+    loadActivities(userId) {
+        const activitiesRef = ref(database, `activities/${userId}`);
+        
+        onValue(activitiesRef, (snapshot) => {
+            const activities = snapshot.val() || {};
+            this.activitiesList.innerHTML = ''; // Clear existing content
+
+            Object.entries(activities)
+                .sort(([, a], [, b]) => b.timestamp - a.timestamp)
+                .slice(0, 5) // Show only last 5 activities
+                .forEach(([id, activity]) => {
+                    const activityEl = this.createActivityElement(activity);
+                    this.activitiesList.appendChild(activityEl);
+                });
+        });
+    }
+
+    createActivityElement(activity) {
+        const element = document.createElement('div');
+        element.className = 'activity-item';
+        element.innerHTML = `
+            <h4>${activity.title}</h4>
+            <p>${this.formatTimeAgo(activity.timestamp)}</p>
+        `;
+        return element;
+    }
+
+    updateStats(inProgress, completed, totalHours) {
+        this.inProgressCount.textContent = inProgress;
+        this.completedCount.textContent = completed;
+        this.hoursCount.textContent = Math.round(totalHours);
+    }
+
+    // Utility functions
+    formatDate(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        if (date.toDateString() === now.toDateString()) {
+            return 'Today';
+        } else if (date.toDateString() === tomorrow.toDateString()) {
+            return 'Tomorrow';
+        } else {
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric'
+            });
+        }
+    }
+
+    formatTimeAgo(timestamp) {
+        const now = new Date();
+        const date = new Date(timestamp);
+        const diff = now - date;
+
+        // Convert to minutes/hours/days
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+
+        if (minutes < 60) {
+            return minutes <= 1 ? 'just now' : `${minutes}m ago`;
+        } else if (hours < 24) {
+            return `${hours}h ago`;
+        } else if (days < 7) {
+            return `${days}d ago`;
+        } else {
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+    }
+
+    showError(message) {
+        // Create error toast
+        const toast = document.createElement('div');
+        toast.className = 'toast toast-error';
+        toast.innerHTML = `
+            <i class="fas fa-exclamation-circle"></i>
+            <span>${message}</span>
+        `;
+
+        // Add to document
+        document.body.appendChild(toast);
+
+        // Remove after delay
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    showSuccess(message) {
+        // Create success toast
+        const toast = document.createElement('div');
+        toast.className = 'toast toast-success';
+        toast.innerHTML = `
+            <i class="fas fa-check-circle"></i>
+            <span>${message}</span>
+        `;
+
+        // Add to document
+        document.body.appendChild(toast);
+
+        // Remove after delay
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    // Profile Management
+    initializeProfileModal() {
+        const modal = document.getElementById('profileModal');
+        const openBtn = document.getElementById('editProfile');
+        const closeBtn = modal.querySelector('.close-modal');
+        const saveBtn = document.getElementById('saveProfile');
+        const profileForm = document.getElementById('profileForm');
+
+        // Open modal
+        openBtn.addEventListener('click', () => {
+            modal.style.display = 'block';
+            this.loadUserProfile();
+        });
+
+        // Close modal
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        // Close on outside click
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Handle profile image upload
+        const profilePicture = document.getElementById('profilePicture');
+        profilePicture.addEventListener('change', (e) => {
+            this.handleProfileImageUpload(e.target.files[0]);
+        });
+
+        // Handle form submission
+        saveBtn.addEventListener('click', async () => {
+            await this.saveUserProfile();
+            modal.style.display = 'none';
+        });
+    }
+
+    async loadUserProfile() {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        try {
+            const snapshot = await get(ref(database, `users/${user.uid}`));
+            const userData = snapshot.val();
+
+            if (userData) {
+                document.getElementById('displayName').value = userData.name || '';
+                document.getElementById('bio').value = userData.bio || '';
+                
+                if (userData.photoURL) {
+                    document.getElementById('profilePreview').src = userData.photoURL;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading profile:', error);
+            this.showError('Failed to load profile');
+        }
+    }
+
+    async handleProfileImageUpload(file) {
+        if (!file) return;
+
+        try {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('profilePreview').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // Upload to Firebase Storage
+            const storageRef = ref(storage, `profile_images/${user.uid}`);
+            await uploadBytes(storageRef, file);
+            const photoURL = await getDownloadURL(storageRef);
+
+            // Update user profile
+            await updateProfile(user, { photoURL });
+            await update(ref(database, `users/${user.uid}`), { photoURL });
+
+            this.showSuccess('Profile picture updated');
+        } catch (error) {
+            console.error('Error uploading profile image:', error);
+            this.showError('Failed to upload profile image');
+        }
+    }
+
+    async saveUserProfile() {
+        try {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const displayName = document.getElementById('displayName').value;
+            const bio = document.getElementById('bio').value;
+
+            // Update database
+            await update(ref(database, `users/${user.uid}`), {
+                name: displayName,
+                bio: bio,
+                updatedAt: new Date().toISOString()
+            });
+
+            // Update profile
+            await updateProfile(user, { displayName });
+
+            this.showSuccess('Profile updated successfully');
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            this.showError('Failed to save profile');
+        }
     }
 }
+
+// Initialize dashboard
+const dashboard = new DashboardManager();
