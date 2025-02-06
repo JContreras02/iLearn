@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iLearn - Login</title>
+    <!-- Firebase SDKs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-auth-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-database-compat.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+      }
+
+      body {
+        background: #f5f5f5;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+      }
+
+      .login-container {
+        background: white;
+        padding: 3rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 480px;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        font-size: 1.5rem;
+        color: #1a1a1a;
+        text-decoration: none;
+      }
+
+      .logo-icon {
+        width: 32px;
+        height: 32px;
+        background: #4285f4;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 30% 100%);
+      }
+
+      h1 {
+        color: #1a1a1a;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        text-align: center;
+      }
+
+      .subtitle {
+        color: #666;
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+        text-align: center;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        display: block;
+        color: #1a1a1a;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #4285f4;
+      }
+
+      .forgot-password {
+        display: block;
+        text-align: right;
+        color: #4285f4;
+        text-decoration: none;
+        margin-top: -1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .login-btn {
+        width: 100%;
+        padding: 0.75rem;
+        background: #4285f4;
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-bottom: 2rem;
+      }
+
+      .login-btn:hover {
+        background: #3367d6;
+      }
+
+      .divider {
+        display: flex;
+        align-items: center;
+        margin: 2rem 0;
+        color: #666;
+        text-align: center;
+      }
+
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #ddd;
+        margin: 0 1rem;
+      }
+
+      .google-btn {
+        width: 100%;
+        padding: 0.75rem;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        margin-bottom: 2rem;
+        font-size: 1rem;
+      }
+
+      .google-btn:hover {
+        background: #f8f9fa;
+      }
+
+      .signup-prompt {
+        text-align: center;
+        color: #666;
+      }
+
+      .signup-prompt a {
+        color: #4285f4;
+        text-decoration: none;
+      }
+
+      .error-message {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: none;
+      }
+
+      .form-group.error input {
+        border-color: #dc3545;
+      }
+
+      .form-group.error .error-message {
+        display: block;
+      }
+
+      .loading {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+
+      .loading.active {
+        display: flex;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loading" id="loadingSpinner">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="login-container">
+      <a href="index.html" class="logo">
+        <div class="logo-icon"></div>
+        iLearn
+      </a>
+      <h1>Welcome Back</h1>
+      <p class="subtitle">Please login to continue learning</p>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" required />
+          <div class="error-message" id="emailError"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required />
+          <div class="error-message" id="passwordError"></div>
+        </div>
+
+        <a href="#" class="forgot-password">Forgot Password?</a>
+
+        <button type="submit" class="login-btn">Login</button>
+      </form>
+
+      <div class="divider">Or continue with</div>
+
+      <button id="googleSignInBtn" class="google-btn">
+        <img
+          src="./assets/google-icon.png"
+          alt="Google logo"
+          width="20"
+          height="20"
+        />
+        Google
+      </button>
+
+      <p class="signup-prompt">
+        Don't have an account? <a href="signup.html">Sign up</a>
+      </p>
+    </div>
+
+    <script>
+      // Show/hide loading spinner
+      function showLoading() {
+        document.getElementById("loadingSpinner").classList.add("active");
+      }
+
+      function hideLoading() {
+        document.getElementById("loadingSpinner").classList.remove("active");
+      }
+
+      // Initialize Firebase after fetching config
+      async function initializeFirebase() {
+        try {
+          showLoading();
+          const response = await fetch("/config");
+          const firebaseConfig = await response.json();
+
+          if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+            console.log("Firebase initialized successfully");
+          }
+        } catch (error) {
+          console.error("Error initializing Firebase:", error);
+          alert("Failed to initialize application. Please try again.");
+        } finally {
+          hideLoading();
+        }
+      }
+
+      // Initialize Firebase when page loads
+      document.addEventListener("DOMContentLoaded", async () => {
+        await initializeFirebase();
+
+        // Login form handler
+        document
+          .getElementById("loginForm")
+          .addEventListener("submit", async (e) => {
+            e.preventDefault();
+            clearErrors();
+
+            try {
+              showLoading();
+              const email = document.getElementById("email").value;
+              const password = document.getElementById("password").value;
+
+              // Sign in with Firebase
+              const userCredential = await firebase
+                .auth()
+                .signInWithEmailAndPassword(email, password);
+
+              // Get user data
+              const snapshot = await firebase
+                .database()
+                .ref(`users/${userCredential.user.uid}`)
+                .once("value");
+              const userData = snapshot.val();
+
+              // Redirect based on user type
+              window.location.href =
+                userData.userType === "instructor"
+                  ? "/instructor-dashboard"
+                  : "/student-dashboard";
+            } catch (error) {
+              console.error("Login error:", error);
+              handleLoginError(error);
+            } finally {
+              hideLoading();
+            }
+          });
+
+        // Google sign-in handler
+        document
+          .getElementById("googleSignInBtn")
+          .addEventListener("click", async () => {
+            try {
+              showLoading();
+              const provider = new firebase.auth.GoogleAuthProvider();
+              const result = await firebase.auth().signInWithPopup(provider);
+
+              // Check if user exists
+              const snapshot = await firebase
+                .database()
+                .ref(`users/${result.user.uid}`)
+                .once("value");
+
+              if (!snapshot.exists()) {
+                // First time Google sign in - create user profile
+                await firebase.database().ref(`users/${result.user.uid}`).set({
+                  fullName: result.user.displayName,
+                  email: result.user.email,
+                  userType: "student", // Default to student
+                  createdAt: Date.now(),
+                  photoURL: result.user.photoURL,
+                });
+              }
+
+              // Redirect based on user type
+              const userData = snapshot.val() || { userType: "student" };
+              window.location.href =
+                userData.userType === "instructor"
+                  ? "/instructor-dashboard"
+                  : "/student-dashboard";
+            } catch (error) {
+              console.error("Google Sign In Error:", error);
+              handleLoginError(error);
+            } finally {
+              hideLoading();
+            }
+          });
+      });
+
+      function handleLoginError(error) {
+        switch (error.code) {
+          case "auth/user-not-found":
+            showError("email", "No account exists with this email");
+            break;
+          case "auth/wrong-password":
+            showError("password", "Incorrect password");
+            break;
+          case "auth/invalid-email":
+            showError("email", "Invalid email address");
+            break;
+          case "auth/user-disabled":
+            showError("email", "This account has been disabled");
+            break;
+          default:
+            showError("email", "An error occurred. Please try again.");
+            console.error(error);
+        }
+      }
+
+      function showError(field, message) {
+        const errorElement = document.getElementById(`${field}Error`);
+        const inputElement = document.getElementById(field);
+
+        if (errorElement) {
+          errorElement.textContent = message;
+          errorElement.style.display = "block";
+        }
+
+        if (inputElement) {
+          inputElement.parentElement.classList.add("error");
+        }
+      }
+
+      function clearErrors() {
+        const errorElements = document.querySelectorAll(".error-message");
+        const formGroups = document.querySelectorAll(".form-group");
+
+        errorElements.forEach((element) => {
+          element.textContent = "";
+          element.style.display = "none";
+        });
+        formGroups.forEach((group) => group.classList.remove("error"));
+      }
+    </script>
+  </body>
+</html>

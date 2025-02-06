@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iLearn - Student Dashboard</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+      }
+
+      body {
+        background: #f5f7fb;
+        min-height: 100vh;
+      }
+
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 5%;
+        background: white;
+        border-bottom: 1px solid #eee;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #1a1a1a;
+        text-decoration: none;
+      }
+
+      .logo-icon {
+        width: 24px;
+        height: 24px;
+        background: #4285f4;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 30% 100%);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      .nav-links a {
+        text-decoration: none;
+        color: #666;
+      }
+
+      .nav-links a.active {
+        color: #4285f4;
+      }
+
+      .profile-icon {
+        width: 40px;
+        height: 40px;
+        background: #4285f4;
+        border-radius: 50%;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 5%;
+      }
+
+      .welcome-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .welcome-card h1 {
+        font-size: 1.8rem;
+        color: #1a1a1a;
+        margin-bottom: 0.5rem;
+      }
+
+      .welcome-card p {
+        color: #666;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 1rem;
+      }
+
+      .stat-card h3 {
+        color: #666;
+        font-size: 1rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+      }
+
+      .stat-card .number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #1a1a1a;
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-card .link {
+        color: #4285f4;
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+
+      .stat-card .subtitle {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .section {
+        margin-bottom: 3rem;
+      }
+
+      .section h2 {
+        font-size: 1.5rem;
+        color: #1a1a1a;
+        margin-bottom: 1.5rem;
+      }
+
+      .current-courses {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        min-height: 200px;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+      }
+
+      .deadlines,
+      .notifications {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        min-height: 200px;
+      }
+
+      .recent-activity {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        min-height: 200px;
+      }
+
+      @media (max-width: 768px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #f0f0f0;
+        border-radius: 4px;
+        margin-top: 0.5rem;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: #4285f4;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+
+      .course-progress {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Firebase SDKs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-auth-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-database-compat.min.js"></script>
+
+    <!-- Dashboard Content -->
+    <nav class="navbar">
+      <a href="#" class="logo">
+        <div class="logo-icon"></div>
+        iLearn
+      </a>
+      <div class="nav-links">
+        <a href="#" class="active">Dashboard</a>
+        <a href="#">My Courses</a>
+        <a href="#">Messages</a>
+        <div class="profile-icon" id="profileInitials"></div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="welcome-card">
+        <h1 id="welcomeMessage">Welcome back!</h1>
+        <p>Let's continue learning!</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Courses in Progress</h3>
+          <div class="number" id="coursesInProgress">0</div>
+          <a href="#" class="link">View all courses</a>
+        </div>
+
+        <div class="stat-card">
+          <h3>Completed Courses</h3>
+          <div class="number" id="completedCourses">0</div>
+          <a href="#" class="link">View certificates</a>
+        </div>
+
+        <div class="stat-card">
+          <h3>Hours Learned</h3>
+          <div class="number" id="hoursLearned">0</div>
+          <div class="subtitle">This month</div>
+        </div>
+
+        <div class="stat-card">
+          <h3>Average Score</h3>
+          <div class="number" id="averageScore">0%</div>
+          <div class="subtitle">Based on assignments</div>
+        </div>
+      </div>
+
+      <div id="activeCourses" class="section">
+        <!-- Active courses will be populated here -->
+      </div>
+
+      <div class="grid-2">
+        <div class="section">
+          <h2>Upcoming Deadlines</h2>
+          <div id="deadlines" class="deadlines">
+            <!-- Deadlines will be populated here -->
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Notifications</h2>
+          <div id="notifications" class="notifications">
+            <!-- Notifications will be populated here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+        authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+        databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
+        projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+        storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+        appId: process.env.REACT_APP_FIREBASE_APP_ID,
+        measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const database = firebase.database();
+
+      // Student Dashboard Class
+      class StudentDashboard {
+        constructor(userId) {
+          this.userId = userId;
+          this.userData = null;
+          this.courses = [];
+          this.initialize();
+        }
+
+        async initialize() {
+          await this.loadUserData();
+          await this.loadCourses();
+          this.updateUI();
+          this.setupRealTimeListeners();
+        }
+
+        async loadUserData() {
+          const snapshot = await database
+            .ref(`users/${this.userId}`)
+            .once("value");
+          this.userData = snapshot.val();
+          return this.userData;
+        }
+
+        async loadCourses() {
+          const enrollmentsSnapshot = await database
+            .ref(`enrollments`)
+            .orderByChild("studentId")
+            .equalTo(this.userId)
+            .once("value");
+          const enrollments = enrollmentsSnapshot.val() || {};
+
+          const coursePromises = Object.keys(enrollments).map(
+            async (courseId) => {
+              const courseSnapshot = await database
+                .ref(`courses/${courseId}`)
+                .once("value");
+              const progressSnapshot = await database
+                .ref(`progress/${courseId}/${this.userId}`)
+                .once("value");
+
+              return {
+                ...courseSnapshot.val(),
+                id: courseId,
+                progress: progressSnapshot.val()?.progress || 0,
+              };
+            }
+          );
+
+          this.courses = await Promise.all(coursePromises);
+          return this.courses;
+        }
+
+        updateUI() {
+          // Update welcome message
+          document.getElementById(
+            "welcomeMessage"
+          ).textContent = `Welcome back, ${this.userData.fullName}!`;
+
+          // Update profile initials
+          const initials = this.userData.fullName
+            .split(" ")
+            .map((n) => n[0])
+            .join("");
+          document.getElementById("profileInitials").textContent = initials;
+
+          // Update statistics
+          const stats = this.calculateStats();
+          document.getElementById("coursesInProgress").textContent =
+            stats.inProgress;
+          document.getElementById("completedCourses").textContent =
+            stats.completed;
+          document.getElementById("hoursLearned").textContent =
+            stats.hoursLearned;
+          document.getElementById(
+            "averageScore"
+          ).textContent = `${stats.averageScore}%`;
+
+          // Update active courses
+          this.updateActiveCourses();
+
+          // Update deadlines and notifications
+          this.updateDeadlines();
+          this.updateNotifications();
+        }
+
+        calculateStats() {
+          const stats = {
+            inProgress: 0,
+            completed: 0,
+            hoursLearned: 0,
+            averageScore: 0,
+          };
+
+          this.courses.forEach((course) => {
+            if (course.progress === 100) {
+              stats.completed++;
+            } else {
+              stats.inProgress++;
+            }
+            stats.hoursLearned += (course.progress * course.totalHours) / 100;
+          });
+
+          stats.averageScore = this.calculateAverageScore();
+          return stats;
+        }
+
+        calculateAverageScore() {
+          const scores = this.courses
+            .filter((course) => course.assignments)
+            .map((course) => {
+              const assignments = Object.values(course.assignments);
+              return (
+                assignments.reduce(
+                  (sum, assignment) => sum + assignment.score,
+                  0
+                ) / assignments.length
+              );
+            });
+
+          return scores.length
+            ? Math.round(scores.reduce((a, b) => a + b) / scores.length)
+            : 0;
+        }
+
+        updateActiveCourses() {
+          const activeCoursesContainer =
+            document.getElementById("activeCourses");
+          activeCoursesContainer.innerHTML = `
+                    <h2>Current Courses</h2>
+                    <div class="courses-grid">
+                        ${this.courses
+                          .map((course) => this.createCourseCard(course))
+                          .join("")}
+                    </div>
+                `;
+        }
+
+        createCourseCard(course) {
+          return `
+                    <div class="course-card">
+                        <div class="course-image"></div>
+                        <div class="course-content">
+                            <h3>${course.title}</h3>
+                            <div class="course-progress">
+                                Progress: ${course.progress}%
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${course.progress}%"></div>
+                                </div>
+                            </div>
+                            <button onclick="continueLesson('${course.id}')" class="btn btn-primary">Continue Learning</button>
+                        </div>
+                    </div>
+                `;
+        }
+
+        updateDeadlines() {
+          const deadlines = this.courses
+            .flatMap((course) => {
+              return (course.assignments || [])
+                .filter((assignment) => !assignment.submitted)
+                .map((assignment) => ({
+                  ...assignment,
+                  courseTitle: course.title,
+                }));
+            })
+            .sort((a, b) => a.dueDate - b.dueDate);
+
+          document.getElementById("deadlines").innerHTML = deadlines.length
+            ? deadlines
+                .map(
+                  (deadline) => `
+                        <div class="deadline-item">
+                            <h4>${deadline.title}</h4>
+                            <p>${deadline.courseTitle}</p>
+                            <p>Due: ${new Date(
+                              deadline.dueDate
+                            ).toLocaleDateString()}</p>
+                        </div>
+                    `
+                )
+                .join("")
+            : "<p>No upcoming deadlines</p>";
+        }
+
+        updateNotifications() {
+          // Implementation for notifications
+        }
+
+        setupRealTimeListeners() {
+          // Listen for course progress updates
+          database
+            .ref(`progress`)
+            .orderByChild("studentId")
+            .equalTo(this.userId)
+            .on("value", (snapshot) => {
+              this.loadCourses().then(() => this.updateUI());
+            });
+
+          // Listen for new assignments
+          database
+            .ref(`assignments`)
+            .orderByChild("studentId")
+            .equalTo(this.userId)
+            .on("value", (snapshot) => {
+              this.updateDeadlines();
+            });
+        }
+      }
+
+      // Auth state observer
+      auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          const userData = await database
+            .ref(`users/${user.uid}`)
+            .once("value");
+          const userType = userData.val()?.userType;
+
+          if (userType === "student") {
+            // Initialize dashboard
+            new StudentDashboard(user.uid);
+          } else {
+            // Redirect to appropriate page
+            window.location.href = "/login.html";
+          }
+        } else {
+          // User is signed out
+          window.location.href = "/login.html";
+        }
+      });
+
+      // Utility function for continuing lessons
+      function continueLesson(courseId) {
+        window.location.href = `/course.html?id=${courseId}`;
+      }
+    </script>
+  </body>
+</html>
