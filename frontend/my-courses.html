@@ -1,0 +1,645 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iLearn - My Courses</title>
+    <style>
+      /* [Previous styles remain the same until main-content] */
+      [Previous styles...]
+      @import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+      }
+
+      body {
+        background: #f8fafc;
+        min-height: 100vh;
+        display: flex;
+      }
+
+      /* Sidebar Styles */
+      .sidebar {
+        width: 260px;
+        background: white;
+        box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        height: 100vh;
+        position: fixed;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #0066cc;
+        margin-bottom: 2rem;
+        text-decoration: none;
+      }
+
+      .logo-img {
+        width: 30px;
+        height: 30px;
+        object-fit: contain;
+      }
+
+      .nav-menu {
+        list-style: none;
+        flex: 1;
+      }
+
+      .nav-item {
+        margin-bottom: 0.5rem;
+      }
+
+      .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        text-decoration: none;
+        color: #64748b;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .nav-link:hover,
+      .nav-link.active {
+        background: rgba(73, 147, 238, 0.1);
+        color: #4993ee;
+      }
+
+      .user-profile {
+        padding: 1rem;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .profile-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e2e8f0;
+      }
+
+      .profile-info {
+        flex: 1;
+      }
+
+      .profile-name {
+        font-weight: 600;
+        color: #1a365d;
+      }
+
+      .profile-email {
+        font-size: 0.875rem;
+        color: #64748b;
+      }
+
+      /* Main Content Styles */
+      .main-content {
+        flex: 1;
+        margin-left: 260px;
+        padding: 2rem;
+      }
+
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .welcome-message {
+        color: #1a365d;
+      }
+
+      .notification-bell {
+        padding: 0.5rem;
+        background: white;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .notification-bell:hover {
+        background: rgba(73, 147, 238, 0.1);
+        transform: translateY(-2px);
+      }
+
+      /* Dashboard Grid */
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+      }
+
+      .stat-title {
+        color: #64748b;
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-value {
+        color: #1a365d;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      /* Course Progress Section */
+      .section-title {
+        color: #1a365d;
+        margin-bottom: 1rem;
+      }
+
+      .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .course-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+      }
+
+      .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+      }
+
+      .course-header {
+        padding: 1rem;
+        background: #4993ee;
+        color: white;
+      }
+
+      .course-content {
+        padding: 1rem;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        margin: 1rem 0;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(45deg, #4993ee, #2563eb);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+
+      /* Calendar Section */
+      .calendar-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .upcoming-lessons {
+        list-style: none;
+      }
+
+      .lesson-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .lesson-date {
+        padding: 0.5rem;
+        background: rgba(73, 147, 238, 0.1);
+        border-radius: 8px;
+        color: #4993ee;
+        font-weight: 500;
+        min-width: 100px;
+        text-align: center;
+      }
+
+      .lesson-info {
+        flex: 1;
+      }
+
+      .lesson-title {
+        color: #1a365d;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+      }
+
+      .lesson-time {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .sidebar {
+          display: none;
+        }
+
+        .main-content {
+          margin-left: 0;
+        }
+
+        /* Course List Styles */
+        .course-filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .filter-btn {
+        padding: 0.5rem 1.5rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 25px;
+        background: white;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .filter-btn.active {
+        background: #4993ee;
+        color: white;
+        border-color: #4993ee;
+      }
+
+      .course-list {
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .course-item {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        display: grid;
+        grid-template-columns: 240px 1fr auto;
+        transition: all 0.3s ease;
+      }
+
+      .course-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+      }
+
+      .course-thumbnail {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        background: #e2e8f0;
+      }
+
+      .course-details {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .course-status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .status-in-progress {
+        background: rgba(73, 147, 238, 0.1);
+        color: #4993ee;
+      }
+
+      .status-completed {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+      }
+
+      .course-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1a365d;
+      }
+
+      .course-instructor {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .course-progress {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: auto;
+      }
+
+      .progress-bar {
+        flex: 1;
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(45deg, #4993ee, #2563eb);
+        border-radius: 4px;
+      }
+
+      .progress-text {
+        color: #4993ee;
+        font-weight: 500;
+        font-size: 0.875rem;
+      }
+
+      .course-actions {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 1rem;
+        border-left: 1px solid #e2e8f0;
+      }
+
+      .action-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        text-align: center;
+        transition: all 0.3s ease;
+        text-decoration: none;
+      }
+
+      .btn-continue {
+        background: linear-gradient(45deg, #1a365d, #2563eb);
+        color: white;
+      }
+
+      .btn-continue:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+      }
+
+      .btn-materials {
+        background: rgba(73, 147, 238, 0.1);
+        color: #4993ee;
+      }
+
+      .btn-materials:hover {
+        background: rgba(73, 147, 238, 0.2);
+      }
+
+      .course-materials-panel {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        display: none;
+      }
+
+      .course-materials-panel.active {
+        display: block;
+      }
+
+      .materials-list {
+        list-style: none;
+      }
+
+      .material-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .material-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(73, 147, 238, 0.1);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4993ee;
+      }
+
+      .material-info {
+        flex: 1;
+      }
+
+      .material-title {
+        color: #1a365d;
+        font-weight: 500;
+      }
+
+      .material-meta {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .download-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        background: rgba(73, 147, 238, 0.1);
+        color: #4993ee;
+        text-decoration: none;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+      }
+
+      .download-btn:hover {
+        background: rgba(73, 147, 238, 0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Sidebar remains the same -->
+    [Previous sidebar code...]
+    <aside class="sidebar">
+      <a href="index.html" class="logo">
+        <img src="../assets/logo-icon.png" alt="iLearn Logo" class="logo-img" />
+        iLearn
+      </a>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="#dashboard" class="nav-link active">Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a href="#courses" class="nav-link">My Courses</a>
+        </li>
+        <li class="nav-item">
+          <a href="#assignments" class="nav-link">Assignments</a>
+        </li>
+        <li class="nav-item">
+          <a href="#grades" class="nav-link">Grades</a>
+        </li>
+        <li class="nav-item">
+          <a href="#calendar" class="nav-link">Calendar</a>
+        </li>
+        <li class="nav-item">
+          <a href="#messages" class="nav-link">Messages</a>
+        </li>
+        <li class="nav-item">
+          <a href="#settings" class="nav-link">Settings</a>
+        </li>
+      </ul>
+      <div class="user-profile">
+        <img src="/api/placeholder/100/100" alt="Profile" class="profile-img" />
+        <div class="profile-info">
+          <div class="profile-name">John Doe</div>
+          <div class="profile-email">john@example.com</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="dashboard-header">
+        <h1 class="welcome-message">My Courses</h1>
+        <div class="notification-bell">🔔</div>
+      </div>
+
+      <div class="course-filters">
+        <button class="filter-btn active">All Courses</button>
+        <button class="filter-btn">In Progress</button>
+        <button class="filter-btn">Completed</button>
+        <button class="filter-btn">Archived</button>
+      </div>
+
+      <div class="course-list">
+        <!-- Course 1 -->
+        <div class="course-item">
+          <img
+            src="/api/placeholder/240/160"
+            alt="Web Development"
+            class="course-thumbnail"
+          />
+          <div class="course-details">
+            <span class="course-status status-in-progress">In Progress</span>
+            <h3 class="course-title">Complete Web Development Bootcamp</h3>
+            <p class="course-instructor">Instructor: Sarah Johnson</p>
+            <div class="course-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 75%"></div>
+              </div>
+              <span class="progress-text">75% Complete</span>
+            </div>
+          </div>
+          <div class="course-actions">
+            <a href="#continue" class="action-btn btn-continue"
+              >Continue Learning</a
+            >
+            <button class="action-btn btn-materials">Course Materials</button>
+          </div>
+        </div>
+
+        <!-- Course Materials Panel -->
+        <div class="course-materials-panel">
+          <h3>Course Materials</h3>
+          <ul class="materials-list">
+            <li class="material-item">
+              <div class="material-icon">📄</div>
+              <div class="material-info">
+                <div class="material-title">Week 1 - HTML Fundamentals</div>
+                <div class="material-meta">PDF • 2.5 MB</div>
+              </div>
+              <a href="#download" class="download-btn">Download</a>
+            </li>
+            <li class="material-item">
+              <div class="material-icon">📄</div>
+              <div class="material-info">
+                <div class="material-title">Week 2 - CSS Basics</div>
+                <div class="material-meta">PDF • 3.1 MB</div>
+              </div>
+              <a href="#download" class="download-btn">Download</a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Course 2 -->
+        <div class="course-item">
+          <img
+            src="/api/placeholder/240/160"
+            alt="Data Science"
+            class="course-thumbnail"
+          />
+          <div class="course-details">
+            <span class="course-status status-completed">Completed</span>
+            <h3 class="course-title">Python for Data Analysis</h3>
+            <p class="course-instructor">Instructor: Michael Chen</p>
+            <div class="course-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 100%"></div>
+              </div>
+              <span class="progress-text">100% Complete</span>
+            </div>
+          </div>
+          <div class="course-actions">
+            <a href="#review" class="action-btn btn-continue">Review Course</a>
+            <button class="action-btn btn-materials">Course Materials</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // Toggle course materials panel
+      document.querySelectorAll(".btn-materials").forEach((button) => {
+        button.addEventListener("click", (e) => {
+          const courseItem = e.target.closest(".course-item");
+          const materialsPanel = courseItem.nextElementSibling;
+          materialsPanel.classList.toggle("active");
+        });
+      });
+
+      // Filter buttons
+      document.querySelectorAll(".filter-btn").forEach((button) => {
+        button.addEventListener("click", () => {
+          document
+            .querySelector(".filter-btn.active")
+            .classList.remove("active");
+          button.classList.add("active");
+        });
+      });
+    </script>
+  </body>
+</html>

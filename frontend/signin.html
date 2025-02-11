@@ -1,0 +1,281 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iLearn - Sign In</title>
+    <style>
+      /* Same styles as before */
+      @import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #0066cc, #4993ee, #66b3ff);
+        background-size: 200% 200%;
+        animation: gradientBG 15s ease infinite;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      @keyframes gradientBG {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 5%;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #0066cc;
+      }
+
+      .logo-img {
+        width: 30px;
+        height: 30px;
+        object-fit: contain;
+      }
+
+      .auth-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+      }
+
+      .auth-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 2.5rem;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+        animation: fadeIn 0.5s ease;
+      }
+
+      .auth-card h2 {
+        color: #1a365d;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-size: 1.8rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #4a5568;
+        font-weight: 500;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #4993ee;
+        box-shadow: 0 0 0 3px rgba(73, 147, 238, 0.2);
+      }
+
+      .submit-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(45deg, #1a365d, #2563eb);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .submit-btn:hover {
+        background: linear-gradient(45deg, #2563eb, #1a365d);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+      }
+
+      .auth-links {
+        text-align: center;
+        margin-top: 1.5rem;
+      }
+
+      .auth-links a {
+        color: #4993ee;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+
+      .auth-links a:hover {
+        color: #2563eb;
+      }
+
+      .social-login {
+        margin-top: 2rem;
+        text-align: center;
+      }
+
+      .social-login p {
+        color: #4a5568;
+        margin-bottom: 1rem;
+        position: relative;
+      }
+
+      .social-login p::before,
+      .social-login p::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 30%;
+        height: 1px;
+        background: #e2e8f0;
+      }
+
+      .social-login p::before {
+        left: 0;
+      }
+
+      .social-login p::after {
+        right: 0;
+      }
+
+      .social-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+      }
+
+      .social-btn {
+        padding: 0.75rem 1.5rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        background: white;
+        color: #4a5568;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .social-btn:hover {
+        background: #f8fafc;
+        border-color: #4993ee;
+        transform: translateY(-2px);
+      }
+
+      .forgot-password {
+        text-align: right;
+        margin-bottom: 1.5rem;
+      }
+
+      .forgot-password a {
+        color: #4993ee;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+      }
+
+      .forgot-password a:hover {
+        color: #2563eb;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <a href="index.html" style="text-decoration: none">
+        <div class="logo">
+          <img
+            src="../assets/logo-icon.png"
+            alt="iLearn Logo"
+            class="logo-img"
+          />
+          iLearn
+        </div>
+      </a>
+    </nav>
+
+    <div class="auth-container">
+      <div class="auth-card">
+        <h2>Welcome Back</h2>
+        <form>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              placeholder="Enter your email"
+            />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              placeholder="Enter your password"
+            />
+          </div>
+          <div class="forgot-password">
+            <a href="#forgot-password">Forgot Password?</a>
+          </div>
+          <button type="submit" class="submit-btn">Sign In</button>
+          <div class="auth-links">
+            Don't have an account? <a href="signup.html">Sign Up</a>
+          </div>
+          <div class="social-login">
+            <p>Or continue with</p>
+            <div class="social-buttons">
+              <button type="button" class="social-btn">Google</button>
+              <button type="button" class="social-btn">GitHub</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
