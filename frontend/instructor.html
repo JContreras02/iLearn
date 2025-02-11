@@ -237,6 +237,13 @@
       }
 
       /* Course Management Styles */
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
       .create-course-btn {
         padding: 0.75rem 1.5rem;
         background: linear-gradient(45deg, #1a365d, #2563eb);
@@ -255,19 +262,40 @@
         box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
       }
 
+      /* Filters */
       .course-filters {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 1rem;
         margin-bottom: 2rem;
+        gap: 1rem;
         flex-wrap: wrap;
+      }
+
+      .filter-group {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e2e8f0;
+        background: white;
+        color: #64748b;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .filter-btn.active {
+        background: #4993ee;
+        color: white;
+        border-color: #4993ee;
       }
 
       .search-box {
         display: flex;
-        align-items: center;
         gap: 0.5rem;
-        margin-left: auto;
       }
 
       .search-box input {
@@ -275,62 +303,60 @@
         border: 2px solid #e2e8f0;
         border-radius: 8px;
         outline: none;
-        transition: all 0.3s ease;
-      }
-
-      .search-box input:focus {
-        border-color: #4993ee;
-        box-shadow: 0 0 0 3px rgba(73, 147, 238, 0.1);
+        min-width: 250px;
       }
 
       .search-btn {
-        padding: 0.5rem;
-        background: none;
-        border: none;
+        padding: 0.5rem 1rem;
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
         cursor: pointer;
       }
 
-      .course-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      /* Course List */
+      .course-list {
+        display: flex;
+        flex-direction: column;
         gap: 1.5rem;
       }
 
-      .course-card {
+      .course-item {
         background: white;
         border-radius: 16px;
         overflow: hidden;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        display: grid;
+        grid-template-columns: 250px 1fr auto;
         transition: all 0.3s ease;
       }
 
-      .course-card:hover {
+      .course-item:hover {
         transform: translateY(-5px);
         box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
       }
 
-      .course-header {
+      .course-thumbnail {
         position: relative;
       }
 
       .course-image {
         width: 100%;
-        height: 200px;
+        height: 100%;
         object-fit: cover;
       }
 
       .course-status {
         position: absolute;
         top: 1rem;
-        right: 1rem;
+        left: 1rem;
         padding: 0.25rem 0.75rem;
         border-radius: 20px;
         font-size: 0.875rem;
         font-weight: 500;
-        background: white;
       }
 
-      .course-status.active {
+      .course-status.published {
         background: rgba(34, 197, 94, 0.1);
         color: #22c55e;
       }
@@ -345,69 +371,66 @@
         color: #64748b;
       }
 
-      .course-content {
+      .course-details {
         padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
       }
 
-      .course-content h3 {
+      .course-info h3 {
         color: #1a365d;
+        margin-bottom: 0.5rem;
+      }
+
+      .course-description {
+        color: #64748b;
+        font-size: 0.875rem;
         margin-bottom: 1rem;
       }
 
       .course-meta {
         display: flex;
-        justify-content: space-between;
+        gap: 1rem;
         color: #64748b;
         font-size: 0.875rem;
-        margin-bottom: 1rem;
       }
 
       .course-stats {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-        margin-bottom: 1rem;
-        padding: 1rem 0;
+        display: flex;
+        gap: 2rem;
+        padding-top: 1rem;
         border-top: 1px solid #e2e8f0;
-        border-bottom: 1px solid #e2e8f0;
       }
 
-      .stat {
+      .stat-item {
         display: flex;
         flex-direction: column;
-        align-items: center;
-        text-align: center;
+        gap: 0.25rem;
       }
 
       .stat-label {
         color: #64748b;
-        font-size: 0.875rem;
-        margin-bottom: 0.25rem;
+        font-size: 0.75rem;
       }
 
       .stat-value {
         color: #1a365d;
-        font-weight: 600;
+        font-weight: 500;
       }
 
-      .course-progress {
+      .course-completion {
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
-        padding: 1rem 0;
+        gap: 1rem;
+        padding-top: 1rem;
         border-top: 1px solid #e2e8f0;
-        border-bottom: 1px solid #e2e8f0;
       }
 
-      .progress-item {
+      .completion-section {
         display: flex;
         align-items: center;
         gap: 1rem;
-      }
-
-      .progress-item span {
-        min-width: 80px;
         color: #64748b;
         font-size: 0.875rem;
       }
@@ -427,52 +450,1959 @@
       }
 
       .course-actions {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        border-left: 1px solid #e2e8f0;
+      }
+
+      .action-btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: left;
+        white-space: nowrap;
+      }
+
+      .action-btn.primary {
+        background: #4993ee;
+        color: white;
+      }
+
+      .action-btn:not(.primary) {
+        background: rgba(73, 147, 238, 0.1);
+        color: #4993ee;
+      }
+
+      .action-dropdown {
+        position: relative;
+      }
+
+      .dropdown-btn {
+        width: 100%;
+        padding: 0.5rem;
+        border: none;
+        background: none;
+        cursor: pointer;
+        color: #64748b;
+      }
+
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 100%;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        min-width: 150px;
+        z-index: 1;
+      }
+
+      .action-dropdown:hover .dropdown-content {
+        display: block;
+      }
+
+      .dropdown-content a {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: #1a365d;
+        text-decoration: none;
+        transition: all 0.3s ease;
+      }
+
+      .dropdown-content a:hover {
+        background: #f8fafc;
+      }
+
+      .dropdown-content a.text-danger {
+        color: #ef4444;
+      }
+      .dropdown-content a.text-danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+      }
+
+      /* Notification Styles */
+      .notification-wrapper {
+        position: relative;
+      }
+
+      .notification-bell {
+        position: relative;
+        padding: 0.5rem;
+        background: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.25rem;
+        transition: all 0.3s ease;
+      }
+
+      .notification-bell:hover {
+        background: rgba(73, 147, 238, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #ef4444;
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 20px;
+        min-width: 20px;
+        text-align: center;
+      }
+
+      .notification-dropdown {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: 360px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+
+      .notification-wrapper.active .notification-dropdown {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      .notification-header {
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .notification-header h3 {
+        color: #1a365d;
+        font-size: 1.1rem;
+      }
+
+      .notification-actions {
         display: flex;
         gap: 0.5rem;
       }
 
-      .action-btn {
-        flex: 1;
-        padding: 0.75rem;
+      .mark-all-read {
+        padding: 0.25rem 0.75rem;
+        background: rgba(73, 147, 238, 0.1);
+        color: #4993ee;
         border: none;
-        border-radius: 8px;
+        border-radius: 20px;
         font-size: 0.875rem;
         cursor: pointer;
         transition: all 0.3s ease;
       }
 
-      .action-btn:not(.icon-btn) {
-        background: rgba(73, 147, 238, 0.1);
-        color: #4993ee;
+      .mark-all-read:hover {
+        background: rgba(73, 147, 238, 0.2);
       }
 
-      .action-btn:hover:not(.icon-btn) {
+      .settings-btn {
+        padding: 0.25rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        color: #64748b;
+        transition: color 0.3s ease;
+      }
+
+      .settings-btn:hover {
+        color: #1a365d;
+      }
+
+      .notification-list {
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .notification-item {
+        padding: 1rem;
+        display: flex;
+        gap: 1rem;
+        align-items: start;
+        border-bottom: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+      }
+
+      .notification-item:hover {
+        background: #f8fafc;
+      }
+
+      .notification-item.unread {
+        background: rgba(73, 147, 238, 0.05);
+      }
+
+      .notification-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+      }
+
+      .notification-content {
+        flex: 1;
+      }
+
+      .notification-text strong {
+        display: block;
+        color: #1a365d;
+        margin-bottom: 0.25rem;
+      }
+
+      .notification-text p {
+        color: #64748b;
+        font-size: 0.875rem;
+        margin: 0;
+      }
+
+      .notification-time {
+        display: block;
+        color: #94a3b8;
+        font-size: 0.75rem;
+        margin-top: 0.5rem;
+      }
+
+      .mark-read {
+        padding: 0.25rem;
+        background: none;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        font-size: 1rem;
+        opacity: 0;
+        transition: all 0.3s ease;
+      }
+
+      .notification-item:hover .mark-read {
+        opacity: 1;
+      }
+
+      .notification-footer {
+        padding: 1rem;
+        text-align: center;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .notification-footer a {
+        color: #4993ee;
+        text-decoration: none;
+        font-size: 0.875rem;
+        transition: color 0.3s ease;
+      }
+
+      .notification-footer a:hover {
+        color: #2563eb;
+      }
+
+      @media (max-width: 768px) {
+        .notification-dropdown {
+          position: fixed;
+          top: auto;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          width: 100%;
+          border-radius: 16px 16px 0 0;
+          max-height: 80vh;
+          transform: translateY(100%);
+        }
+
+        .notification-wrapper.active .notification-dropdown {
+          transform: translateY(0);
+        }
+      }
+
+      /* Create Course Modal */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal.active {
+        display: flex;
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        width: 100%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .modal-title {
+        color: #1a365d;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #64748b;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group.full-width {
+        grid-column: 1 / -1;
+      }
+
+      .form-label {
+        display: block;
+        color: #1a365d;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        outline: none;
+        transition: all 0.3s ease;
+      }
+
+      .form-input:focus {
+        border-color: #4993ee;
+        box-shadow: 0 0 0 3px rgba(73, 147, 238, 0.1);
+      }
+
+      textarea.form-input {
+        min-height: 100px;
+        resize: vertical;
+      }
+
+      .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        outline: none;
+        background: white;
+        color: #1a365d;
+        cursor: pointer;
+      }
+
+      .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      @media (max-width: 1024px) {
+        .course-item {
+          grid-template-columns: 200px 1fr;
+        }
+
+        .course-actions {
+          grid-column: 1 / -1;
+          border-left: none;
+          border-top: 1px solid #e2e8f0;
+          flex-direction: row;
+          flex-wrap: wrap;
+        }
+
+        .action-btn {
+          flex: 1;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .course-item {
+          grid-template-columns: 1fr;
+        }
+
+        .course-thumbnail {
+          height: 200px;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Students Section Styles */
+      .student-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        gap: 1rem;
+      }
+
+      .filter-group {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .filter-select {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        outline: none;
+        background: white;
+        color: #1a365d;
+        min-width: 200px;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .export-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(73, 147, 238, 0.1);
+        color: #4993ee;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .export-btn:hover {
+        background: rgba(73, 147, 238, 0.2);
+      }
+
+      /* Table Styles */
+      .table-container {
+        background: white;
+        border-radius: 16px;
+        padding: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        overflow-x: auto;
+        margin-bottom: 2rem;
+      }
+
+      .students-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .students-table th {
+        padding: 1rem;
+        text-align: left;
+        color: #64748b;
+        font-weight: 500;
+        border-bottom: 2px solid #e2e8f0;
+      }
+
+      .students-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .student-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .student-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+      }
+
+      .student-name {
+        color: #1a365d;
+        font-weight: 500;
+      }
+
+      .student-email {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .course-name {
+        color: #1a365d;
+        font-weight: 500;
+      }
+
+      .enrollment-date {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .progress-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .progress-bar {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(45deg, #4993ee, #2563eb);
+        border-radius: 4px;
+      }
+
+      .activity-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .activity-time {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .activity-status {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+
+      .activity-status.active {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+      }
+
+      .activity-status.inactive {
+        background: rgba(100, 116, 139, 0.1);
+        color: #64748b;
+      }
+
+      .performance-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .grade {
+        color: #1a365d;
+        font-weight: 500;
+      }
+
+      .assignment-status {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .assignment-status.warning {
+        color: #f59e0b;
+      }
+
+      .row-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .action-btn {
+        padding: 0.5rem 1rem;
+        background: rgba(73, 147, 238, 0.1);
+        color: #4993ee;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .action-btn:hover {
         background: rgba(73, 147, 238, 0.2);
       }
 
       .icon-btn {
-        flex: 0 0 auto;
+        padding: 0.5rem;
         background: none;
+        border: none;
         color: #64748b;
+        cursor: pointer;
+        transition: all 0.3s ease;
       }
 
       .icon-btn:hover {
         color: #4993ee;
       }
 
+      /* Pagination */
+      .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .page-numbers {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .page-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e2e8f0;
+        background: white;
+        color: #64748b;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .page-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .page-btn.active {
+        background: #4993ee;
+        color: white;
+        border-color: #4993ee;
+      }
+
+      .page-btn:not(:disabled):hover {
+        border-color: #4993ee;
+        color: #4993ee;
+      }
+
+      /* Assignment Styles */
+      .assignment-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        gap: 1rem;
+      }
+
+      .create-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(45deg, #1a365d, #2563eb);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .create-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+      }
+
+      .assignments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .assignment-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+      }
+
+      .assignment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+      }
+
+      .assignment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .assignment-type {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .assignment-type.project {
+        background: rgba(73, 147, 238, 0.1);
+        color: #4993ee;
+      }
+
+      .assignment-type.quiz {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+      }
+
+      .assignment-type.homework {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+      }
+
+      .assignment-title {
+        color: #1a365d;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .assignment-meta {
+        display: flex;
+        justify-content: space-between;
+        color: #64748b;
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+      }
+
+      .assignment-dates {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem 0;
+        border-top: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 1rem;
+      }
+
+      .date-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .date-label {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .date-value {
+        color: #1a365d;
+        font-weight: 500;
+      }
+
+      .submission-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+
+      .stat-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .stat-value {
+        color: #1a365d;
+        font-weight: 600;
+      }
+
+      .stat-label {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .card-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+      }
+
       @media (max-width: 768px) {
-        .course-filters {
+        .assignment-controls {
           flex-direction: column;
-          align-items: stretch;
+        }
+
+        .filter-group {
+          width: 100%;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 0.5rem;
         }
 
         .search-box {
           width: 100%;
-          margin-left: 0;
+        }
+      }
+
+      /* Analytics Styles */
+      .analytics-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .metric-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .metric-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+      }
+
+      .metric-title {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .metric-trend {
+        padding: 0.25rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+      }
+
+      .metric-trend.positive {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+      }
+
+      .metric-trend.negative {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+      }
+
+      .metric-trend.neutral {
+        background: rgba(100, 116, 139, 0.1);
+        color: #64748b;
+      }
+
+      .metric-value {
+        color: #1a365d;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+
+      .mini-chart {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.25rem;
+        height: 40px;
+      }
+
+      .chart-bar {
+        flex: 1;
+        background: #4993ee;
+        border-radius: 2px;
+        transition: height 0.3s ease;
+      }
+
+      .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+      }
+
+      .analytics-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .analytics-card.large {
+        grid-column: span 2;
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .card-header h2 {
+        color: #1a365d;
+        font-size: 1.25rem;
+      }
+
+      .card-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .time-range-select,
+      .view-select {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        background: white;
+        color: #1a365d;
+        outline: none;
+      }
+
+      .chart-container,
+      .map-container {
+        height: 300px;
+        margin-top: 1rem;
+      }
+
+      .placeholder-chart {
+        width: 100%;
+        height: 100%;
+        background: #f8fafc;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .placeholder-chart::after {
+        content: "Chart Visualization";
+      }
+
+      .placeholder-chart.map::after {
+        content: "Map Visualization";
+      }
+
+      .performance-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .performance-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+      }
+
+      .performance-stats {
+        display: flex;
+        gap: 0.5rem;
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .engagement-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        text-align: center;
+      }
+
+      .metric-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-weight: 600;
+      }
+
+      .metric-circle.high {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+      }
+
+      .metric-circle.medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+      }
+
+      .metric-circle.low {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+      }
+
+      @media (max-width: 1024px) {
+        .analytics-grid {
+          grid-template-columns: 1fr;
         }
 
-        .course-grid {
+        .analytics-card.large {
+          grid-column: auto;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header-actions {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .time-range-select {
+          width: 100%;
+        }
+
+        .engagement-stats {
           grid-template-columns: 1fr;
+        }
+      }
+
+      /* Discussion Styles */
+      .discussion-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        gap: 1rem;
+      }
+
+      .filter-group {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e2e8f0;
+        background: white;
+        color: #64748b;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .filter-btn.active {
+        background: #4993ee;
+        color: white;
+        border-color: #4993ee;
+      }
+
+      .discussions-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .section-header h2 {
+        color: #1a365d;
+        font-size: 1.25rem;
+      }
+
+      .discussion-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        display: flex;
+        gap: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .discussion-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+      }
+
+      .discussion-content {
+        flex: 1;
+      }
+
+      .discussion-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .topic-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .topic-badge.announcement {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+      }
+
+      .topic-badge.question {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+      }
+
+      .topic-badge.discussion {
+        background: rgba(73, 147, 238, 0.1);
+        color: #4993ee;
+      }
+
+      .topic-badge.resolved {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+      }
+
+      .topic-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .topic-title {
+        color: #1a365d;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .topic-preview {
+        color: #64748b;
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+      }
+
+      .engagement-stats {
+        display: flex;
+        gap: 1rem;
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .discussion-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .forum-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .forum-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+      }
+
+      .forum-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+      }
+
+      .forum-header {
+        margin-bottom: 1rem;
+      }
+
+      .forum-header h3 {
+        color: #1a365d;
+        margin-bottom: 0.25rem;
+      }
+
+      .forum-stats {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .forum-activity {
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .latest-topic {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.875rem;
+      }
+
+      .topic-title {
+        color: #1a365d;
+      }
+
+      .topic-time {
+        color: #64748b;
+      }
+
+      .sort-select {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        background: white;
+        color: #1a365d;
+        outline: none;
+      }
+
+      @media (max-width: 768px) {
+        .discussion-controls {
+          flex-direction: column;
+        }
+
+        .filter-group {
+          width: 100%;
+        }
+
+        .search-box {
+          width: 100%;
+        }
+
+        .discussion-card {
+          flex-direction: column;
+        }
+
+        .discussion-actions {
+          flex-direction: row;
+        }
+      }
+
+      /* Earnings Styles */
+      .earnings-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .earnings-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .earnings-card.total {
+        background: linear-gradient(135deg, #1a365d, #2563eb);
+        color: white;
+      }
+
+      .earnings-card.total .card-header h2 {
+        color: white;
+      }
+
+      .earnings-amount {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #1a365d;
+        margin: 1rem 0;
+      }
+
+      .earnings-card.total .earnings-amount {
+        color: white;
+      }
+
+      .earnings-trend {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+      }
+
+      .earnings-trend.positive {
+        color: #22c55e;
+      }
+
+      .earnings-trend.negative {
+        color: #ef4444;
+      }
+
+      .earnings-card.total .earnings-trend {
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .trend-label {
+        color: #64748b;
+      }
+
+      .earnings-card.total .trend-label {
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      .payout-info {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .withdraw-btn {
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        background: #4993ee;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .withdraw-btn:hover {
+        background: #2563eb;
+      }
+
+      .earnings-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+      }
+
+      .earnings-chart-card {
+        grid-column: span 2;
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .chart-controls {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .chart-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e2e8f0;
+        background: white;
+        color: #64748b;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .chart-btn.active {
+        background: #4993ee;
+        color: white;
+        border-color: #4993ee;
+      }
+
+      .course-revenue-card,
+      .transactions-card,
+      .payout-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .course-revenue-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .course-revenue-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+      }
+
+      .course-stats {
+        display: flex;
+        gap: 0.5rem;
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .revenue-info {
+        text-align: right;
+      }
+
+      .revenue-amount {
+        color: #1a365d;
+        font-weight: 600;
+      }
+
+      .revenue-trend {
+        font-size: 0.875rem;
+      }
+
+      .revenue-trend.positive {
+        color: #22c55e;
+      }
+
+      .revenue-trend.negative {
+        color: #ef4444;
+      }
+
+      .transactions-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .transaction-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+      }
+
+      .transaction-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+      }
+
+      .transaction-info {
+        flex: 1;
+      }
+
+      .transaction-title {
+        color: #1a365d;
+        font-weight: 500;
+      }
+
+      .transaction-details {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .transaction-amount {
+        font-weight: 600;
+      }
+
+      .transaction-amount.positive {
+        color: #22c55e;
+      }
+
+      .transaction-amount.negative {
+        color: #ef4444;
+      }
+
+      .payout-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .payout-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+      }
+
+      .payout-date {
+        color: #1a365d;
+        font-weight: 500;
+      }
+
+      .payout-status {
+        font-size: 0.875rem;
+      }
+
+      .payout-status.completed {
+        color: #22c55e;
+      }
+
+      .payout-status.pending {
+        color: #f59e0b;
+      }
+
+      .payout-amount {
+        color: #1a365d;
+        font-weight: 600;
+      }
+
+      @media (max-width: 1024px) {
+        .earnings-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .earnings-chart-card {
+          grid-column: auto;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header-actions {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .time-range-select {
+          width: 100%;
+        }
+
+        .chart-controls {
+          flex-wrap: wrap;
+        }
+
+        .course-revenue-item,
+        .transaction-item,
+        .payout-item {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .revenue-info,
+        .transaction-amount {
+          margin-top: 0.5rem;
+          text-align: center;
+        }
+      }
+
+      /* Settings Styles */
+      .settings-container {
+        display: flex;
+        gap: 2rem;
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .settings-nav {
+        width: 240px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .settings-link {
+        padding: 0.75rem 1rem;
+        color: #64748b;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .settings-link:hover {
+        background: rgba(73, 147, 238, 0.05);
+        color: #4993ee;
+      }
+
+      .settings-link.active {
+        background: rgba(73, 147, 238, 0.1);
+        color: #4993ee;
+        font-weight: 500;
+      }
+
+      .settings-content {
+        flex: 1;
+      }
+
+      .settings-panel {
+        display: none;
+      }
+
+      .settings-panel.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .panel-title {
+        color: #1a365d;
+        margin-bottom: 2rem;
+      }
+
+      .profile-header {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .profile-avatar {
+        text-align: center;
+      }
+
+      .profile-avatar img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin-bottom: 1rem;
+      }
+
+      .change-avatar-btn {
+        padding: 0.5rem 1rem;
+        background: rgba(73, 147, 238, 0.1);
+        color: #4993ee;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .change-avatar-btn:hover {
+        background: rgba(73, 147, 238, 0.2);
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: rgba(73, 147, 238, 0.1);
+        color: #4993ee;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .status-text {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      .settings-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .form-group label {
+        color: #1a365d;
+        font-weight: 500;
+      }
+
+      .form-input {
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        outline: none;
+        transition: all 0.3s ease;
+      }
+
+      .form-input:focus {
+        border-color: #4993ee;
+        box-shadow: 0 0 0 3px rgba(73, 147, 238, 0.1);
+      }
+
+      .settings-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .settings-section h3 {
+        color: #1a365d;
+        margin-bottom: 1rem;
+      }
+
+      .settings-group {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .notification-group {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .notification-option {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+      }
+
+      .option-info h3 {
+        color: #1a365d;
+        margin-bottom: 0.25rem;
+      }
+
+      .option-info p {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      /* Toggle Switch */
+      .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 48px;
+        height: 24px;
+      }
+
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #e2e8f0;
+        transition: 0.4s;
+        border-radius: 24px;
+      }
+
+      .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .toggle-slider {
+        background-color: #4993ee;
+      }
+
+      input:checked + .toggle-slider:before {
+        transform: translateX(24px);
+      }
+
+      /* Payment Methods */
+      .payment-methods {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .payment-method {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+      }
+
+      .payment-method label {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+      }
+
+      .method-name {
+        color: #1a365d;
+        font-weight: 500;
+      }
+
+      .method-email,
+      .method-details {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      /* Form Actions */
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .btn-primary {
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(45deg, #1a365d, #2563eb);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+      }
+
+      .btn-secondary {
+        padding: 0.75rem 1.5rem;
+        background: white;
+        color: #64748b;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-secondary:hover {
+        background: #f8fafc;
+      }
+
+      @media (max-width: 768px) {
+        .settings-container {
+          flex-direction: column;
+        }
+
+        .settings-nav {
+          width: 100%;
+        }
+
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+
+        .profile-header {
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+      }
+
+      .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+      }
+
+      .toast {
+        min-width: 300px;
+        margin-bottom: 10px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        background: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s;
+      }
+
+      .toast.success {
+        border-left: 4px solid #22c55e;
+      }
+
+      .toast.error {
+        border-left: 4px solid #ef4444;
+      }
+
+      .toast-icon {
+        font-size: 1.25rem;
+      }
+
+      .toast.success .toast-icon {
+        color: #22c55e;
+      }
+
+      .toast.error .toast-icon {
+        color: #ef4444;
+      }
+
+      .toast-message {
+        flex: 1;
+        color: #1a365d;
+      }
+
+      .toast-close {
+        color: #64748b;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.25rem;
+        padding: 0;
+        line-height: 1;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
         }
       }
     </style>
@@ -480,7 +2410,7 @@
   <body>
     <aside class="sidebar">
       <a href="#" class="logo">
-        <img src="/api/placeholder/30/30" alt="iLearn Logo" class="logo-img" />
+        <img src="../assets/logo-icon.png" alt="iLearn Logo" class="logo-img" />
         iLearn
       </a>
       <ul class="nav-menu">
@@ -551,7 +2481,67 @@
       <section id="dashboard-section" class="content-section active">
         <div class="dashboard-header">
           <h1 class="page-title">Welcome back, Dr. Johnson! 👋</h1>
-          <div class="notification-bell">🔔</div>
+          <div class="notification-wrapper">
+            <button class="notification-bell">
+              🔔
+              <span class="notification-badge">3</span>
+            </button>
+
+            <div class="notification-dropdown">
+              <div class="notification-header">
+                <h3>Notifications</h3>
+                <div class="notification-actions">
+                  <button class="mark-all-read">Mark all as read</button>
+                  <button class="settings-btn">⚙️</button>
+                </div>
+              </div>
+
+              <div class="notification-list">
+                <!-- Unread Notification -->
+                <div class="notification-item unread">
+                  <div class="notification-icon student">👤</div>
+                  <div class="notification-content">
+                    <div class="notification-text">
+                      <strong>New Student Enrollment</strong>
+                      <p>John Smith enrolled in Web Development Bootcamp</p>
+                    </div>
+                    <span class="notification-time">2 minutes ago</span>
+                  </div>
+                  <button class="mark-read">•••</button>
+                </div>
+
+                <!-- Unread Notification -->
+                <div class="notification-item unread">
+                  <div class="notification-icon comment">💬</div>
+                  <div class="notification-content">
+                    <div class="notification-text">
+                      <strong>New Course Review</strong>
+                      <p>5★ review on Data Science Fundamentals</p>
+                    </div>
+                    <span class="notification-time">1 hour ago</span>
+                  </div>
+                  <button class="mark-read">•••</button>
+                </div>
+
+                <!-- Read Notification -->
+                <div class="notification-item">
+                  <div class="notification-icon earning">💰</div>
+                  <div class="notification-content">
+                    <div class="notification-text">
+                      <strong>New Earnings</strong>
+                      <p>You earned $199 from course sales</p>
+                    </div>
+                    <span class="notification-time">3 hours ago</span>
+                  </div>
+                  <button class="mark-read">•••</button>
+                </div>
+              </div>
+
+              <div class="notification-footer">
+                <a href="#all-notifications">View All Notifications</a>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Stats Overview -->
@@ -628,7 +2618,1867 @@
         </div>
       </section>
 
-      <!-- Other sections will be added here -->
+      <!-- Courses Section -->
+      <section id="courses-section" class="content-section">
+        <div class="dashboard-header">
+          <h1 class="page-title">My Courses</h1>
+          <button class="create-course-btn">
+            <span>+</span> Create New Course
+          </button>
+        </div>
+
+        <!-- Course Filters -->
+        <div class="course-filters">
+          <div class="filter-group">
+            <button class="filter-btn active">All Courses</button>
+            <button class="filter-btn">Published</button>
+            <button class="filter-btn">Draft</button>
+            <button class="filter-btn">Archived</button>
+          </div>
+
+          <div class="search-box">
+            <input type="text" placeholder="Search courses..." />
+            <button class="search-btn">🔍</button>
+          </div>
+        </div>
+
+        <!-- Course List -->
+        <div class="course-list">
+          <!-- Course Item 1 -->
+          <div class="course-item">
+            <div class="course-thumbnail">
+              <img
+                src="/api/placeholder/300/200"
+                alt="Web Development"
+                class="course-image"
+              />
+              <span class="course-status published">Published</span>
+            </div>
+            <div class="course-details">
+              <div class="course-info">
+                <h3>Web Development Bootcamp</h3>
+                <p class="course-description">
+                  Complete web development course covering HTML, CSS,
+                  JavaScript, and more.
+                </p>
+                <div class="course-meta">
+                  <span>📚 24 Lessons</span>
+                  <span>⏱️ 42 Hours</span>
+                  <span>👥 256 Students</span>
+                </div>
+              </div>
+              <div class="course-stats">
+                <div class="stat-item">
+                  <span class="stat-label">Rating</span>
+                  <span class="stat-value">⭐ 4.8 (125)</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Revenue</span>
+                  <span class="stat-value">$12,450</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Completion Rate</span>
+                  <span class="stat-value">78%</span>
+                </div>
+              </div>
+            </div>
+            <div class="course-actions">
+              <button class="action-btn primary">Edit Course</button>
+              <button class="action-btn">View Content</button>
+              <button class="action-btn">Analytics</button>
+              <div class="action-dropdown">
+                <button class="dropdown-btn">⋮</button>
+                <div class="dropdown-content">
+                  <a href="#">Preview Course</a>
+                  <a href="#">Duplicate</a>
+                  <a href="#">Archive</a>
+                  <a href="#" class="text-danger">Delete</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Course Item 2 -->
+          <div class="course-item">
+            <div class="course-thumbnail">
+              <img
+                src="/api/placeholder/300/200"
+                alt="Data Science"
+                class="course-image"
+              />
+              <span class="course-status draft">Draft</span>
+            </div>
+            <div class="course-details">
+              <div class="course-info">
+                <h3>Data Science Fundamentals</h3>
+                <p class="course-description">
+                  Comprehensive introduction to data science using Python and
+                  popular libraries.
+                </p>
+                <div class="course-meta">
+                  <span>📚 18 Lessons</span>
+                  <span>⏱️ 36 Hours</span>
+                  <span>📝 In Progress</span>
+                </div>
+              </div>
+              <div class="course-completion">
+                <div class="completion-section">
+                  <span>Course Content</span>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 75%"></div>
+                  </div>
+                  <span>75%</span>
+                </div>
+                <div class="completion-section">
+                  <span>Materials</span>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 60%"></div>
+                  </div>
+                  <span>60%</span>
+                </div>
+              </div>
+            </div>
+            <div class="course-actions">
+              <button class="action-btn primary">Continue Editing</button>
+              <button class="action-btn">Preview</button>
+              <button class="action-btn">Publish</button>
+              <div class="action-dropdown">
+                <button class="dropdown-btn">⋮</button>
+                <div class="dropdown-content">
+                  <a href="#">Save as Template</a>
+                  <a href="#">Duplicate</a>
+                  <a href="#" class="text-danger">Delete Draft</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Course Item 3 -->
+          <div class="course-item">
+            <div class="course-thumbnail">
+              <img
+                src="/api/placeholder/300/200"
+                alt="Python Programming"
+                class="course-image"
+              />
+              <span class="course-status archived">Archived</span>
+            </div>
+            <div class="course-details">
+              <div class="course-info">
+                <h3>Python Programming Advanced</h3>
+                <p class="course-description">
+                  Advanced Python concepts including OOP, Design Patterns, and
+                  Best Practices.
+                </p>
+                <div class="course-meta">
+                  <span>📚 20 Lessons</span>
+                  <span>⏱️ 38 Hours</span>
+                  <span>👥 189 Students</span>
+                </div>
+              </div>
+              <div class="course-stats">
+                <div class="stat-item">
+                  <span class="stat-label">Total Revenue</span>
+                  <span class="stat-value">$8,920</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Rating</span>
+                  <span class="stat-value">⭐ 4.6 (89)</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Last Active</span>
+                  <span class="stat-value">2 months ago</span>
+                </div>
+              </div>
+            </div>
+            <div class="course-actions">
+              <button class="action-btn primary">Restore Course</button>
+              <button class="action-btn">View Content</button>
+              <button class="action-btn">Analytics</button>
+              <div class="action-dropdown">
+                <button class="dropdown-btn">⋮</button>
+                <div class="dropdown-content">
+                  <a href="#">Preview</a>
+                  <a href="#">Duplicate</a>
+                  <a href="#" class="text-danger">Delete Permanently</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Students Section -->
+      <section id="students-section" class="content-section">
+        <div class="dashboard-header">
+          <h1 class="page-title">Students</h1>
+          <div class="header-actions">
+            <button class="export-btn"><span>📥</span> Export Data</button>
+            <div class="notification-wrapper">
+              <button class="notification-bell">
+                🔔
+                <span class="notification-badge">3</span>
+              </button>
+
+              <div class="notification-dropdown">
+                <div class="notification-header">
+                  <h3>Notifications</h3>
+                  <div class="notification-actions">
+                    <button class="mark-all-read">Mark all as read</button>
+                    <button class="settings-btn">⚙️</button>
+                  </div>
+                </div>
+
+                <div class="notification-list">
+                  <!-- Unread Notification -->
+                  <div class="notification-item unread">
+                    <div class="notification-icon student">👤</div>
+                    <div class="notification-content">
+                      <div class="notification-text">
+                        <strong>New Student Enrollment</strong>
+                        <p>John Smith enrolled in Web Development Bootcamp</p>
+                      </div>
+                      <span class="notification-time">2 minutes ago</span>
+                    </div>
+                    <button class="mark-read">•••</button>
+                  </div>
+
+                  <!-- Unread Notification -->
+                  <div class="notification-item unread">
+                    <div class="notification-icon comment">💬</div>
+                    <div class="notification-content">
+                      <div class="notification-text">
+                        <strong>New Course Review</strong>
+                        <p>5★ review on Data Science Fundamentals</p>
+                      </div>
+                      <span class="notification-time">1 hour ago</span>
+                    </div>
+                    <button class="mark-read">•••</button>
+                  </div>
+
+                  <!-- Read Notification -->
+                  <div class="notification-item">
+                    <div class="notification-icon earning">💰</div>
+                    <div class="notification-content">
+                      <div class="notification-text">
+                        <strong>New Earnings</strong>
+                        <p>You earned $199 from course sales</p>
+                      </div>
+                      <span class="notification-time">3 hours ago</span>
+                    </div>
+                    <button class="mark-read">•••</button>
+                  </div>
+                </div>
+
+                <div class="notification-footer">
+                  <a href="#all-notifications">View All Notifications</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student Filters & Search -->
+        <div class="student-controls">
+          <div class="filter-group">
+            <select class="filter-select">
+              <option value="all">All Courses</option>
+              <option value="web-dev">Web Development Bootcamp</option>
+              <option value="data-science">Data Science Fundamentals</option>
+              <option value="python">Python Programming</option>
+            </select>
+            <select class="filter-select">
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+          <div class="search-box">
+            <input type="text" placeholder="Search students..." />
+            <button class="search-btn">🔍</button>
+          </div>
+        </div>
+
+        <!-- Students Table -->
+        <div class="table-container">
+          <table class="students-table">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" class="select-all" />
+                </th>
+                <th>Student</th>
+                <th>Course</th>
+                <th>Progress</th>
+                <th>Last Active</th>
+                <th>Performance</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Student Row 1 -->
+              <tr>
+                <td>
+                  <input type="checkbox" class="select-student" />
+                </td>
+                <td>
+                  <div class="student-info">
+                    <img
+                      src="/api/placeholder/40/40"
+                      alt="Student"
+                      class="student-avatar"
+                    />
+                    <div>
+                      <div class="student-name">John Smith</div>
+                      <div class="student-email">john@example.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="course-info">
+                    <div class="course-name">Web Development Bootcamp</div>
+                    <div class="enrollment-date">Enrolled: Jan 15, 2025</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="progress-info">
+                    <div class="progress-bar">
+                      <div class="progress-fill" style="width: 75%"></div>
+                    </div>
+                    <span>75% Complete</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="activity-info">
+                    <span class="activity-time">2 hours ago</span>
+                    <span class="activity-status active">Active</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="performance-info">
+                    <div class="grade">A (92%)</div>
+                    <div class="assignment-status">
+                      All assignments up to date
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <button class="action-btn">View Progress</button>
+                    <button class="icon-btn">⋮</button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Student Row 2 -->
+              <tr>
+                <td>
+                  <input type="checkbox" class="select-student" />
+                </td>
+                <td>
+                  <div class="student-info">
+                    <img
+                      src="/api/placeholder/40/40"
+                      alt="Student"
+                      class="student-avatar"
+                    />
+                    <div>
+                      <div class="student-name">Emma Johnson</div>
+                      <div class="student-email">emma@example.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="course-info">
+                    <div class="course-name">Data Science Fundamentals</div>
+                    <div class="enrollment-date">Enrolled: Jan 10, 2025</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="progress-info">
+                    <div class="progress-bar">
+                      <div class="progress-fill" style="width: 45%"></div>
+                    </div>
+                    <span>45% Complete</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="activity-info">
+                    <span class="activity-time">1 day ago</span>
+                    <span class="activity-status inactive">Inactive</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="performance-info">
+                    <div class="grade">B+ (88%)</div>
+                    <div class="assignment-status warning">
+                      1 assignment pending
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <button class="action-btn">View Progress</button>
+                    <button class="icon-btn">⋮</button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Student Row 3 -->
+              <tr>
+                <td>
+                  <input type="checkbox" class="select-student" />
+                </td>
+                <td>
+                  <div class="student-info">
+                    <img
+                      src="/api/placeholder/40/40"
+                      alt="Student"
+                      class="student-avatar"
+                    />
+                    <div>
+                      <div class="student-name">Michael Chen</div>
+                      <div class="student-email">michael@example.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="course-info">
+                    <div class="course-name">Python Programming</div>
+                    <div class="enrollment-date">Enrolled: Jan 5, 2025</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="progress-info">
+                    <div class="progress-bar">
+                      <div class="progress-fill" style="width: 90%"></div>
+                    </div>
+                    <span>90% Complete</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="activity-info">
+                    <span class="activity-time">Just now</span>
+                    <span class="activity-status active">Active</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="performance-info">
+                    <div class="grade">A+ (98%)</div>
+                    <div class="assignment-status">
+                      All assignments up to date
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <button class="action-btn">View Progress</button>
+                    <button class="icon-btn">⋮</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <button class="page-btn" disabled>Previous</button>
+          <div class="page-numbers">
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <span>...</span>
+            <button class="page-btn">10</button>
+          </div>
+          <button class="page-btn">Next</button>
+        </div>
+      </section>
+
+      <!-- Assignments Section -->
+      <section id="assignments-section" class="content-section">
+        <div class="dashboard-header">
+          <h1 class="page-title">Assignments</h1>
+          <div class="header-actions">
+            <button class="create-btn"><span>+</span> Create Assignment</button>
+            <div class="notification-wrapper">
+              <button class="notification-bell">
+                🔔
+                <span class="notification-badge">3</span>
+              </button>
+
+              <div class="notification-dropdown">
+                <div class="notification-header">
+                  <h3>Notifications</h3>
+                  <div class="notification-actions">
+                    <button class="mark-all-read">Mark all as read</button>
+                    <button class="settings-btn">⚙️</button>
+                  </div>
+                </div>
+
+                <div class="notification-list">
+                  <!-- Unread Notification -->
+                  <div class="notification-item unread">
+                    <div class="notification-icon student">👤</div>
+                    <div class="notification-content">
+                      <div class="notification-text">
+                        <strong>New Student Enrollment</strong>
+                        <p>John Smith enrolled in Web Development Bootcamp</p>
+                      </div>
+                      <span class="notification-time">2 minutes ago</span>
+                    </div>
+                    <button class="mark-read">•••</button>
+                  </div>
+
+                  <!-- Unread Notification -->
+                  <div class="notification-item unread">
+                    <div class="notification-icon comment">💬</div>
+                    <div class="notification-content">
+                      <div class="notification-text">
+                        <strong>New Course Review</strong>
+                        <p>5★ review on Data Science Fundamentals</p>
+                      </div>
+                      <span class="notification-time">1 hour ago</span>
+                    </div>
+                    <button class="mark-read">•••</button>
+                  </div>
+
+                  <!-- Read Notification -->
+                  <div class="notification-item">
+                    <div class="notification-icon earning">💰</div>
+                    <div class="notification-content">
+                      <div class="notification-text">
+                        <strong>New Earnings</strong>
+                        <p>You earned $199 from course sales</p>
+                      </div>
+                      <span class="notification-time">3 hours ago</span>
+                    </div>
+                    <button class="mark-read">•••</button>
+                  </div>
+                </div>
+
+                <div class="notification-footer">
+                  <a href="#all-notifications">View All Notifications</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Assignment Controls -->
+        <div class="assignment-controls">
+          <div class="filter-group">
+            <select class="filter-select">
+              <option value="all">All Courses</option>
+              <option value="web-dev">Web Development Bootcamp</option>
+              <option value="data-science">Data Science Fundamentals</option>
+              <option value="python">Python Programming</option>
+            </select>
+            <select class="filter-select">
+              <option value="all">All Status</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="active">Active</option>
+              <option value="past">Past</option>
+            </select>
+            <select class="filter-select">
+              <option value="all">All Types</option>
+              <option value="project">Project</option>
+              <option value="quiz">Quiz</option>
+              <option value="homework">Homework</option>
+            </select>
+          </div>
+          <div class="search-box">
+            <input type="text" placeholder="Search assignments..." />
+            <button class="search-btn">🔍</button>
+          </div>
+        </div>
+
+        <!-- Assignments Grid -->
+        <div class="assignments-grid">
+          <!-- Assignment Card 1 -->
+          <div class="assignment-card">
+            <div class="assignment-header">
+              <span class="assignment-type project">Project</span>
+              <div class="assignment-actions">
+                <button class="icon-btn">✏️</button>
+                <button class="icon-btn">⋮</button>
+              </div>
+            </div>
+            <h3 class="assignment-title">
+              Final Project: Full-Stack Application
+            </h3>
+            <div class="assignment-meta">
+              <span class="course-name">Web Development Bootcamp</span>
+              <span class="points">100 points</span>
+            </div>
+            <div class="assignment-dates">
+              <div class="date-item">
+                <span class="date-label">Due Date</span>
+                <span class="date-value">Feb 15, 2025 - 11:59 PM</span>
+              </div>
+              <div class="date-item">
+                <span class="date-label">Published</span>
+                <span class="date-value">Feb 1, 2025</span>
+              </div>
+            </div>
+            <div class="submission-stats">
+              <div class="stat-item">
+                <span class="stat-value">24/30</span>
+                <span class="stat-label">Submitted</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">18</span>
+                <span class="stat-label">Graded</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">85%</span>
+                <span class="stat-label">Avg. Score</span>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="action-btn">Grade Submissions</button>
+              <button class="action-btn">View Details</button>
+            </div>
+          </div>
+
+          <!-- Assignment Card 2 -->
+          <div class="assignment-card">
+            <div class="assignment-header">
+              <span class="assignment-type quiz">Quiz</span>
+              <div class="assignment-actions">
+                <button class="icon-btn">✏️</button>
+                <button class="icon-btn">⋮</button>
+              </div>
+            </div>
+            <h3 class="assignment-title">Python Data Structures Quiz</h3>
+            <div class="assignment-meta">
+              <span class="course-name">Python Programming</span>
+              <span class="points">50 points</span>
+            </div>
+            <div class="assignment-dates">
+              <div class="date-item">
+                <span class="date-label">Due Date</span>
+                <span class="date-value">Feb 12, 2025 - 3:00 PM</span>
+              </div>
+              <div class="date-item">
+                <span class="date-label">Published</span>
+                <span class="date-value">Feb 5, 2025</span>
+              </div>
+            </div>
+            <div class="submission-stats">
+              <div class="stat-item">
+                <span class="stat-value">28/30</span>
+                <span class="stat-label">Submitted</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">28</span>
+                <span class="stat-label">Auto-graded</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">92%</span>
+                <span class="stat-label">Avg. Score</span>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="action-btn">View Results</button>
+              <button class="action-btn">View Details</button>
+            </div>
+          </div>
+
+          <!-- Assignment Card 3 -->
+          <div class="assignment-card">
+            <div class="assignment-header">
+              <span class="assignment-type homework">Homework</span>
+              <div class="assignment-actions">
+                <button class="icon-btn">✏️</button>
+                <button class="icon-btn">⋮</button>
+              </div>
+            </div>
+            <h3 class="assignment-title">Data Visualization Exercise</h3>
+            <div class="assignment-meta">
+              <span class="course-name">Data Science Fundamentals</span>
+              <span class="points">30 points</span>
+            </div>
+            <div class="assignment-dates">
+              <div class="date-item">
+                <span class="date-label">Due Date</span>
+                <span class="date-value">Feb 18, 2025 - 11:59 PM</span>
+              </div>
+              <div class="date-item">
+                <span class="date-label">Published</span>
+                <span class="date-value">Feb 11, 2025</span>
+              </div>
+            </div>
+            <div class="submission-stats">
+              <div class="stat-item">
+                <span class="stat-value">15/30</span>
+                <span class="stat-label">Submitted</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">10</span>
+                <span class="stat-label">Graded</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">88%</span>
+                <span class="stat-label">Avg. Score</span>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="action-btn">Grade Submissions</button>
+              <button class="action-btn">View Details</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Analytics Section -->
+      <section id="analytics-section" class="content-section">
+        <div class="dashboard-header">
+          <h1 class="page-title">Analytics</h1>
+          <div class="header-actions">
+            <select class="time-range-select">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+              <option value="365">Last year</option>
+            </select>
+            <button class="export-btn"><span>📥</span> Export Report</button>
+            <div class="notification-wrapper">
+              <button class="notification-bell">
+                🔔
+                <span class="notification-badge">3</span>
+              </button>
+
+              <div class="notification-dropdown">
+                <div class="notification-header">
+                  <h3>Notifications</h3>
+                  <div class="notification-actions">
+                    <button class="mark-all-read">Mark all as read</button>
+                    <button class="settings-btn">⚙️</button>
+                  </div>
+                </div>
+
+                <div class="notification-list">
+                  <!-- Unread Notification -->
+                  <div class="notification-item unread">
+                    <div class="notification-icon student">👤</div>
+                    <div class="notification-content">
+                      <div class="notification-text">
+                        <strong>New Student Enrollment</strong>
+                        <p>John Smith enrolled in Web Development Bootcamp</p>
+                      </div>
+                      <span class="notification-time">2 minutes ago</span>
+                    </div>
+                    <button class="mark-read">•••</button>
+                  </div>
+
+                  <!-- Unread Notification -->
+                  <div class="notification-item unread">
+                    <div class="notification-icon comment">💬</div>
+                    <div class="notification-content">
+                      <div class="notification-text">
+                        <strong>New Course Review</strong>
+                        <p>5★ review on Data Science Fundamentals</p>
+                      </div>
+                      <span class="notification-time">1 hour ago</span>
+                    </div>
+                    <button class="mark-read">•••</button>
+                  </div>
+
+                  <!-- Read Notification -->
+                  <div class="notification-item">
+                    <div class="notification-icon earning">💰</div>
+                    <div class="notification-content">
+                      <div class="notification-text">
+                        <strong>New Earnings</strong>
+                        <p>You earned $199 from course sales</p>
+                      </div>
+                      <span class="notification-time">3 hours ago</span>
+                    </div>
+                    <button class="mark-read">•••</button>
+                  </div>
+                </div>
+
+                <div class="notification-footer">
+                  <a href="#all-notifications">View All Notifications</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Overview -->
+        <div class="analytics-overview">
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-title">Total Revenue</span>
+              <span class="metric-trend positive">↑ 12.5%</span>
+            </div>
+            <div class="metric-value">$45,678</div>
+            <div class="metric-chart">
+              <div class="mini-chart">
+                <!-- Placeholder for mini chart -->
+                <div class="chart-bar" style="height: 60%"></div>
+                <div class="chart-bar" style="height: 80%"></div>
+                <div class="chart-bar" style="height: 40%"></div>
+                <div class="chart-bar" style="height: 90%"></div>
+                <div class="chart-bar" style="height: 70%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-title">Active Students</span>
+              <span class="metric-trend positive">↑ 8.3%</span>
+            </div>
+            <div class="metric-value">1,234</div>
+            <div class="metric-chart">
+              <div class="mini-chart">
+                <div class="chart-bar" style="height: 50%"></div>
+                <div class="chart-bar" style="height: 70%"></div>
+                <div class="chart-bar" style="height: 60%"></div>
+                <div class="chart-bar" style="height: 80%"></div>
+                <div class="chart-bar" style="height: 85%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-title">Course Completion Rate</span>
+              <span class="metric-trend negative">↓ 2.1%</span>
+            </div>
+            <div class="metric-value">76.5%</div>
+            <div class="metric-chart">
+              <div class="mini-chart">
+                <div class="chart-bar" style="height: 80%"></div>
+                <div class="chart-bar" style="height: 75%"></div>
+                <div class="chart-bar" style="height: 85%"></div>
+                <div class="chart-bar" style="height: 70%"></div>
+                <div class="chart-bar" style="height: 76%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-title">Average Rating</span>
+              <span class="metric-trend neutral">= 0.0%</span>
+            </div>
+            <div class="metric-value">4.8</div>
+            <div class="metric-chart">
+              <div class="mini-chart">
+                <div class="chart-bar" style="height: 90%"></div>
+                <div class="chart-bar" style="height: 95%"></div>
+                <div class="chart-bar" style="height: 92%"></div>
+                <div class="chart-bar" style="height: 96%"></div>
+                <div class="chart-bar" style="height: 96%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Analytics -->
+        <div class="analytics-grid">
+          <!-- Revenue Analysis -->
+          <div class="analytics-card large">
+            <div class="card-header">
+              <h2>Revenue Analysis</h2>
+              <div class="card-actions">
+                <button class="filter-btn active">Revenue</button>
+                <button class="filter-btn">Enrollments</button>
+                <button class="filter-btn">Growth</button>
+              </div>
+            </div>
+            <div class="chart-container">
+              <!-- Placeholder for revenue chart -->
+              <div class="placeholder-chart revenue"></div>
+            </div>
+          </div>
+
+          <!-- Course Performance -->
+          <div class="analytics-card">
+            <div class="card-header">
+              <h2>Course Performance</h2>
+              <button class="icon-btn">⋮</button>
+            </div>
+            <div class="performance-list">
+              <div class="performance-item">
+                <div class="course-info">
+                  <div class="course-name">Web Development Bootcamp</div>
+                  <div class="performance-stats">
+                    <span>256 Students</span>
+                    <span>•</span>
+                    <span>4.8 ★</span>
+                  </div>
+                </div>
+                <div class="performance-metric">
+                  <div class="metric-label">Revenue</div>
+                  <div class="metric-value">$12,450</div>
+                </div>
+              </div>
+
+              <div class="performance-item">
+                <div class="course-info">
+                  <div class="course-name">Data Science Fundamentals</div>
+                  <div class="performance-stats">
+                    <span>189 Students</span>
+                    <span>•</span>
+                    <span>4.6 ★</span>
+                  </div>
+                </div>
+                <div class="performance-metric">
+                  <div class="metric-label">Revenue</div>
+                  <div class="metric-value">$8,920</div>
+                </div>
+              </div>
+
+              <div class="performance-item">
+                <div class="course-info">
+                  <div class="course-name">Python Programming</div>
+                  <div class="performance-stats">
+                    <span>145 Students</span>
+                    <span>•</span>
+                    <span>4.7 ★</span>
+                  </div>
+                </div>
+                <div class="performance-metric">
+                  <div class="metric-label">Revenue</div>
+                  <div class="metric-value">$6,780</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Student Engagement -->
+          <div class="analytics-card">
+            <div class="card-header">
+              <h2>Student Engagement</h2>
+              <button class="icon-btn">⋮</button>
+            </div>
+            <div class="engagement-stats">
+              <div class="engagement-metric">
+                <div class="metric-circle high">
+                  <span class="metric-value">85%</span>
+                </div>
+                <div class="metric-label">Active Users</div>
+              </div>
+              <div class="engagement-metric">
+                <div class="metric-circle medium">
+                  <span class="metric-value">65%</span>
+                </div>
+                <div class="metric-label">Completion</div>
+              </div>
+              <div class="engagement-metric">
+                <div class="metric-circle low">
+                  <span class="metric-value">45%</span>
+                </div>
+                <div class="metric-label">Participation</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Geographic Distribution -->
+          <div class="analytics-card large">
+            <div class="card-header">
+              <h2>Geographic Distribution</h2>
+              <select class="view-select">
+                <option value="students">Students</option>
+                <option value="revenue">Revenue</option>
+              </select>
+            </div>
+            <div class="map-container">
+              <!-- Placeholder for map visualization -->
+              <div class="placeholder-chart map"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Discussions Section -->
+      <section id="discussions-section" class="content-section">
+        <div class="dashboard-header">
+          <h1 class="page-title">Discussions</h1>
+          <div class="header-actions">
+            <button class="create-btn"><span>+</span> New Announcement</button>
+            <div class="notification-wrapper">
+              <button class="notification-bell">
+                🔔
+                <span class="notification-badge">3</span>
+              </button>
+
+              <div class="notification-dropdown">
+                <div class="notification-header">
+                  <h3>Notifications</h3>
+                  <div class="notification-actions">
+                    <button class="mark-all-read">Mark all as read</button>
+                    <button class="settings-btn">⚙️</button>
+                  </div>
+                </div>
+
+                <div class="notification-list">
+                  <!-- Unread Notification -->
+                  <div class="notification-item unread">
+                    <div class="notification-icon student">👤</div>
+                    <div class="notification-content">
+                      <div class="notification-text">
+                        <strong>New Student Enrollment</strong>
+                        <p>John Smith enrolled in Web Development Bootcamp</p>
+                      </div>
+                      <span class="notification-time">2 minutes ago</span>
+                    </div>
+                    <button class="mark-read">•••</button>
+                  </div>
+
+                  <!-- Unread Notification -->
+                  <div class="notification-item unread">
+                    <div class="notification-icon comment">💬</div>
+                    <div class="notification-content">
+                      <div class="notification-text">
+                        <strong>New Course Review</strong>
+                        <p>5★ review on Data Science Fundamentals</p>
+                      </div>
+                      <span class="notification-time">1 hour ago</span>
+                    </div>
+                    <button class="mark-read">•••</button>
+                  </div>
+
+                  <!-- Read Notification -->
+                  <div class="notification-item">
+                    <div class="notification-icon earning">💰</div>
+                    <div class="notification-content">
+                      <div class="notification-text">
+                        <strong>New Earnings</strong>
+                        <p>You earned $199 from course sales</p>
+                      </div>
+                      <span class="notification-time">3 hours ago</span>
+                    </div>
+                    <button class="mark-read">•••</button>
+                  </div>
+                </div>
+
+                <div class="notification-footer">
+                  <a href="#all-notifications">View All Notifications</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Discussion Controls -->
+        <div class="discussion-controls">
+          <div class="filter-group">
+            <button class="filter-btn active">All</button>
+            <button class="filter-btn">Announcements</button>
+            <button class="filter-btn">Course Discussions</button>
+            <button class="filter-btn">Q&A</button>
+          </div>
+          <div class="search-box">
+            <input type="text" placeholder="Search discussions..." />
+            <button class="search-btn">🔍</button>
+          </div>
+        </div>
+
+        <!-- Discussion Container -->
+        <div class="discussions-container">
+          <!-- Pinned Topics -->
+          <div class="pinned-topics">
+            <div class="section-header">
+              <h2>📌 Pinned Topics</h2>
+            </div>
+
+            <div class="discussion-card pinned">
+              <div class="discussion-content">
+                <div class="discussion-header">
+                  <span class="topic-badge announcement">Announcement</span>
+                  <div class="topic-meta">
+                    <span>Web Development Bootcamp</span>
+                    <span>•</span>
+                    <span>2 days ago</span>
+                  </div>
+                </div>
+                <h3 class="topic-title">
+                  Important: Project Submission Guidelines Update
+                </h3>
+                <p class="topic-preview">
+                  Updated guidelines for final project submissions, including
+                  new requirements and deadline extensions...
+                </p>
+                <div class="engagement-stats">
+                  <span>👁️ 245 views</span>
+                  <span>💬 18 replies</span>
+                  <span>👍 32 likes</span>
+                </div>
+              </div>
+              <div class="discussion-actions">
+                <button class="action-btn">View Thread</button>
+                <button class="icon-btn">⋮</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Discussions -->
+          <div class="recent-discussions">
+            <div class="section-header">
+              <h2>Recent Discussions</h2>
+              <select class="sort-select">
+                <option value="recent">Most Recent</option>
+                <option value="active">Most Active</option>
+                <option value="unanswered">Unanswered</option>
+              </select>
+            </div>
+
+            <!-- Discussion Thread 1 -->
+            <div class="discussion-card">
+              <div class="discussion-content">
+                <div class="discussion-header">
+                  <span class="topic-badge question">Question</span>
+                  <div class="topic-meta">
+                    <span>Data Science Fundamentals</span>
+                    <span>•</span>
+                    <span>3 hours ago</span>
+                  </div>
+                </div>
+                <h3 class="topic-title">
+                  Help with Pandas DataFrame Manipulation
+                </h3>
+                <p class="topic-preview">
+                  Student question about advanced DataFrame operations and data
+                  cleaning techniques...
+                </p>
+                <div class="engagement-stats">
+                  <span>👁️ 45 views</span>
+                  <span>💬 5 replies</span>
+                  <span>🔥 Hot Topic</span>
+                </div>
+              </div>
+              <div class="discussion-actions">
+                <button class="action-btn">Reply</button>
+                <button class="icon-btn">⋮</button>
+              </div>
+            </div>
+
+            <!-- Discussion Thread 2 -->
+            <div class="discussion-card">
+              <div class="discussion-content">
+                <div class="discussion-header">
+                  <span class="topic-badge discussion">Discussion</span>
+                  <div class="topic-meta">
+                    <span>Python Programming</span>
+                    <span>•</span>
+                    <span>1 day ago</span>
+                  </div>
+                </div>
+                <h3 class="topic-title">
+                  Best Practices for Code Organization
+                </h3>
+                <p class="topic-preview">
+                  Discussion about coding standards and project structure for
+                  large applications...
+                </p>
+                <div class="engagement-stats">
+                  <span>👁️ 156 views</span>
+                  <span>💬 12 replies</span>
+                  <span>📌 Featured</span>
+                </div>
+              </div>
+              <div class="discussion-actions">
+                <button class="action-btn">View Thread</button>
+                <button class="icon-btn">⋮</button>
+              </div>
+            </div>
+
+            <!-- Discussion Thread 3 -->
+            <div class="discussion-card">
+              <div class="discussion-content">
+                <div class="discussion-header">
+                  <span class="topic-badge resolved">Resolved</span>
+                  <div class="topic-meta">
+                    <span>Web Development Bootcamp</span>
+                    <span>•</span>
+                    <span>2 days ago</span>
+                  </div>
+                </div>
+                <h3 class="topic-title">Debugging React Components</h3>
+                <p class="topic-preview">
+                  Solutions and tips for common React debugging scenarios and
+                  performance optimization...
+                </p>
+                <div class="engagement-stats">
+                  <span>👁️ 189 views</span>
+                  <span>💬 8 replies</span>
+                  <span>✅ Solved</span>
+                </div>
+              </div>
+              <div class="discussion-actions">
+                <button class="action-btn">View Thread</button>
+                <button class="icon-btn">⋮</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Course Forums -->
+          <div class="course-forums">
+            <div class="section-header">
+              <h2>Course Forums</h2>
+            </div>
+
+            <div class="forum-grid">
+              <div class="forum-card">
+                <div class="forum-header">
+                  <h3>Web Development Bootcamp</h3>
+                  <span class="forum-stats">156 topics • 1.2k replies</span>
+                </div>
+                <div class="forum-activity">
+                  <div class="latest-topic">
+                    <span class="topic-title">Latest: CSS Grid vs Flexbox</span>
+                    <span class="topic-time">10 minutes ago</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="forum-card">
+                <div class="forum-header">
+                  <h3>Data Science Fundamentals</h3>
+                  <span class="forum-stats">98 topics • 856 replies</span>
+                </div>
+                <div class="forum-activity">
+                  <div class="latest-topic">
+                    <span class="topic-title"
+                      >Latest: Data Visualization Tips</span
+                    >
+                    <span class="topic-time">1 hour ago</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="forum-card">
+                <div class="forum-header">
+                  <h3>Python Programming</h3>
+                  <span class="forum-stats">124 topics • 967 replies</span>
+                </div>
+                <div class="forum-activity">
+                  <div class="latest-topic">
+                    <span class="topic-title">Latest: OOP Best Practices</span>
+                    <span class="topic-time">30 minutes ago</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Earnings Section -->
+      <section id="earnings-section" class="content-section">
+        <div class="dashboard-header">
+          <h1 class="page-title">Earnings</h1>
+          <div class="header-actions">
+            <select class="time-range-select">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+              <option value="365">Last year</option>
+              <option value="all">All time</option>
+            </select>
+            <button class="export-btn"><span>📥</span> Export Statement</button>
+            <div class="notification-wrapper">
+              <button class="notification-bell">
+                🔔
+                <span class="notification-badge">3</span>
+              </button>
+
+              <div class="notification-dropdown">
+                <div class="notification-header">
+                  <h3>Notifications</h3>
+                  <div class="notification-actions">
+                    <button class="mark-all-read">Mark all as read</button>
+                    <button class="settings-btn">⚙️</button>
+                  </div>
+                </div>
+
+                <div class="notification-list">
+                  <!-- Unread Notification -->
+                  <div class="notification-item unread">
+                    <div class="notification-icon student">👤</div>
+                    <div class="notification-content">
+                      <div class="notification-text">
+                        <strong>New Student Enrollment</strong>
+                        <p>John Smith enrolled in Web Development Bootcamp</p>
+                      </div>
+                      <span class="notification-time">2 minutes ago</span>
+                    </div>
+                    <button class="mark-read">•••</button>
+                  </div>
+
+                  <!-- Unread Notification -->
+                  <div class="notification-item unread">
+                    <div class="notification-icon comment">💬</div>
+                    <div class="notification-content">
+                      <div class="notification-text">
+                        <strong>New Course Review</strong>
+                        <p>5★ review on Data Science Fundamentals</p>
+                      </div>
+                      <span class="notification-time">1 hour ago</span>
+                    </div>
+                    <button class="mark-read">•••</button>
+                  </div>
+
+                  <!-- Read Notification -->
+                  <div class="notification-item">
+                    <div class="notification-icon earning">💰</div>
+                    <div class="notification-content">
+                      <div class="notification-text">
+                        <strong>New Earnings</strong>
+                        <p>You earned $199 from course sales</p>
+                      </div>
+                      <span class="notification-time">3 hours ago</span>
+                    </div>
+                    <button class="mark-read">•••</button>
+                  </div>
+                </div>
+
+                <div class="notification-footer">
+                  <a href="#all-notifications">View All Notifications</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Earnings Overview -->
+        <div class="earnings-overview">
+          <div class="earnings-card total">
+            <div class="card-header">
+              <h2>Total Earnings</h2>
+              <select class="period-select">
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+              </select>
+            </div>
+            <div class="earnings-amount">$12,345.67</div>
+            <div class="earnings-trend positive">
+              <span class="trend-icon">↑</span>
+              <span class="trend-value">15.4%</span>
+              <span class="trend-label">vs last period</span>
+            </div>
+          </div>
+
+          <div class="earnings-card">
+            <div class="card-header">
+              <h2>Pending Payout</h2>
+            </div>
+            <div class="earnings-amount">$2,890.00</div>
+            <div class="payout-info">Next payout on Feb 15, 2025</div>
+          </div>
+
+          <div class="earnings-card">
+            <div class="card-header">
+              <h2>Available Balance</h2>
+            </div>
+            <div class="earnings-amount">$1,234.56</div>
+            <button class="withdraw-btn">Withdraw Funds</button>
+          </div>
+
+          <div class="earnings-card">
+            <div class="card-header">
+              <h2>Total Students</h2>
+            </div>
+            <div class="earnings-amount">1,234</div>
+            <div class="earnings-trend positive">
+              <span class="trend-icon">↑</span>
+              <span class="trend-value">8.3%</span>
+              <span class="trend-label">vs last period</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Earnings -->
+        <div class="earnings-grid">
+          <!-- Revenue Chart -->
+          <div class="earnings-chart-card">
+            <div class="card-header">
+              <h2>Revenue Overview</h2>
+              <div class="chart-controls">
+                <button class="chart-btn active">Revenue</button>
+                <button class="chart-btn">Enrollments</button>
+                <button class="chart-btn">Average</button>
+              </div>
+            </div>
+            <div class="chart-container">
+              <!-- Placeholder for revenue chart -->
+              <div class="placeholder-chart revenue"></div>
+            </div>
+          </div>
+
+          <!-- Course Revenue -->
+          <div class="course-revenue-card">
+            <div class="card-header">
+              <h2>Revenue by Course</h2>
+              <button class="icon-btn">⋮</button>
+            </div>
+            <div class="course-revenue-list">
+              <div class="course-revenue-item">
+                <div class="course-info">
+                  <div class="course-name">Web Development Bootcamp</div>
+                  <div class="course-stats">
+                    <span>256 Students</span>
+                    <span>•</span>
+                    <span>4.8 ★</span>
+                  </div>
+                </div>
+                <div class="revenue-info">
+                  <div class="revenue-amount">$12,450</div>
+                  <div class="revenue-trend positive">+12.5%</div>
+                </div>
+              </div>
+
+              <div class="course-revenue-item">
+                <div class="course-info">
+                  <div class="course-name">Data Science Fundamentals</div>
+                  <div class="course-stats">
+                    <span>189 Students</span>
+                    <span>•</span>
+                    <span>4.6 ★</span>
+                  </div>
+                </div>
+                <div class="revenue-info">
+                  <div class="revenue-amount">$8,920</div>
+                  <div class="revenue-trend positive">+8.3%</div>
+                </div>
+              </div>
+
+              <div class="course-revenue-item">
+                <div class="course-info">
+                  <div class="course-name">Python Programming</div>
+                  <div class="course-stats">
+                    <span>145 Students</span>
+                    <span>•</span>
+                    <span>4.7 ★</span>
+                  </div>
+                </div>
+                <div class="revenue-info">
+                  <div class="revenue-amount">$6,780</div>
+                  <div class="revenue-trend negative">-2.1%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Transactions -->
+          <div class="transactions-card">
+            <div class="card-header">
+              <h2>Recent Transactions</h2>
+              <button class="view-all-btn">View All</button>
+            </div>
+            <div class="transactions-list">
+              <div class="transaction-item">
+                <div class="transaction-icon deposit">💰</div>
+                <div class="transaction-info">
+                  <div class="transaction-title">Course Purchase</div>
+                  <div class="transaction-details">
+                    Web Development Bootcamp
+                  </div>
+                </div>
+                <div class="transaction-amount positive">+$199.00</div>
+              </div>
+
+              <div class="transaction-item">
+                <div class="transaction-icon withdrawal">💳</div>
+                <div class="transaction-info">
+                  <div class="transaction-title">Payout Processed</div>
+                  <div class="transaction-details">Monthly payout</div>
+                </div>
+                <div class="transaction-amount negative">-$1,450.00</div>
+              </div>
+
+              <div class="transaction-item">
+                <div class="transaction-icon deposit">💰</div>
+                <div class="transaction-info">
+                  <div class="transaction-title">Course Purchase</div>
+                  <div class="transaction-details">Python Programming</div>
+                </div>
+                <div class="transaction-amount positive">+$149.00</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payout History -->
+          <div class="payout-card">
+            <div class="card-header">
+              <h2>Payout History</h2>
+              <select class="payout-filter">
+                <option value="all">All Payouts</option>
+                <option value="completed">Completed</option>
+                <option value="pending">Pending</option>
+              </select>
+            </div>
+            <div class="payout-list">
+              <div class="payout-item">
+                <div class="payout-info">
+                  <div class="payout-date">January 15, 2025</div>
+                  <div class="payout-status completed">Completed</div>
+                </div>
+                <div class="payout-amount">$2,345.67</div>
+              </div>
+
+              <div class="payout-item">
+                <div class="payout-info">
+                  <div class="payout-date">December 15, 2024</div>
+                  <div class="payout-status completed">Completed</div>
+                </div>
+                <div class="payout-amount">$1,987.54</div>
+              </div>
+
+              <div class="payout-item">
+                <div class="payout-info">
+                  <div class="payout-date">November 15, 2024</div>
+                  <div class="payout-status completed">Completed</div>
+                </div>
+                <div class="payout-amount">$2,156.89</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Settings Section -->
+      <section id="settings-section" class="content-section">
+        <div class="dashboard-header">
+          <h1 class="page-title">Settings</h1>
+          <div class="notification-wrapper">
+            <button class="notification-bell">
+              🔔
+              <span class="notification-badge">3</span>
+            </button>
+
+            <div class="notification-dropdown">
+              <div class="notification-header">
+                <h3>Notifications</h3>
+                <div class="notification-actions">
+                  <button class="mark-all-read">Mark all as read</button>
+                  <button class="settings-btn">⚙️</button>
+                </div>
+              </div>
+
+              <div class="notification-list">
+                <!-- Unread Notification -->
+                <div class="notification-item unread">
+                  <div class="notification-icon student">👤</div>
+                  <div class="notification-content">
+                    <div class="notification-text">
+                      <strong>New Student Enrollment</strong>
+                      <p>John Smith enrolled in Web Development Bootcamp</p>
+                    </div>
+                    <span class="notification-time">2 minutes ago</span>
+                  </div>
+                  <button class="mark-read">•••</button>
+                </div>
+
+                <!-- Unread Notification -->
+                <div class="notification-item unread">
+                  <div class="notification-icon comment">💬</div>
+                  <div class="notification-content">
+                    <div class="notification-text">
+                      <strong>New Course Review</strong>
+                      <p>5★ review on Data Science Fundamentals</p>
+                    </div>
+                    <span class="notification-time">1 hour ago</span>
+                  </div>
+                  <button class="mark-read">•••</button>
+                </div>
+
+                <!-- Read Notification -->
+                <div class="notification-item">
+                  <div class="notification-icon earning">💰</div>
+                  <div class="notification-content">
+                    <div class="notification-text">
+                      <strong>New Earnings</strong>
+                      <p>You earned $199 from course sales</p>
+                    </div>
+                    <span class="notification-time">3 hours ago</span>
+                  </div>
+                  <button class="mark-read">•••</button>
+                </div>
+              </div>
+
+              <div class="notification-footer">
+                <a href="#all-notifications">View All Notifications</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-container">
+          <!-- Settings Navigation -->
+          <div class="settings-nav">
+            <a href="#profile" class="settings-link active">Profile</a>
+            <a href="#account" class="settings-link">Account</a>
+            <a href="#notifications" class="settings-link">Notifications</a>
+            <a href="#preferences" class="settings-link">Preferences</a>
+            <a href="#payouts" class="settings-link">Payout Settings</a>
+            <a href="#security" class="settings-link">Security</a>
+          </div>
+
+          <!-- Settings Content -->
+          <div class="settings-content">
+            <!-- Profile Settings -->
+            <div class="settings-panel active" id="profile-settings">
+              <h2 class="panel-title">Profile Settings</h2>
+
+              <div class="profile-header">
+                <div class="profile-avatar">
+                  <img src="/api/placeholder/120/120" alt="Profile Picture" />
+                  <button class="change-avatar-btn">Change Picture</button>
+                </div>
+                <div class="profile-status">
+                  <span class="status-badge">Instructor</span>
+                  <span class="status-text">Member since January 2025</span>
+                </div>
+              </div>
+
+              <form class="settings-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" value="Sarah" class="form-input" />
+                  </div>
+                  <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" value="Johnson" class="form-input" />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Professional Title</label>
+                  <input
+                    type="text"
+                    value="Senior Web Development Instructor"
+                    class="form-input"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>Bio</label>
+                  <textarea class="form-input" rows="4">
+Experienced web developer and instructor with over 10 years of industry experience. Passionate about teaching and helping students achieve their goals.</textarea
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label>Website</label>
+                  <input
+                    type="url"
+                    value="https://example.com"
+                    class="form-input"
+                  />
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>LinkedIn</label>
+                    <input
+                      type="url"
+                      value="https://linkedin.com/in/example"
+                      class="form-input"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>GitHub</label>
+                    <input
+                      type="url"
+                      value="https://github.com/example"
+                      class="form-input"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-secondary">Cancel</button>
+                  <button type="submit" class="btn-primary">
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Account Settings -->
+            <div class="settings-panel" id="account-settings">
+              <h2 class="panel-title">Account Settings</h2>
+
+              <div class="settings-section">
+                <h3>Email Address</h3>
+                <div class="settings-group">
+                  <div class="form-group">
+                    <label>Primary Email</label>
+                    <input
+                      type="email"
+                      value="sarah@example.com"
+                      class="form-input"
+                    />
+                  </div>
+                  <button class="btn-secondary">Verify Email</button>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h3>Password</h3>
+                <div class="settings-group">
+                  <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" class="form-input" />
+                  </div>
+                  <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" class="form-input" />
+                  </div>
+                  <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" class="form-input" />
+                  </div>
+                  <button class="btn-primary">Update Password</button>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h3>Language & Region</h3>
+                <div class="settings-group">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Language</label>
+                      <select class="form-input">
+                        <option>English</option>
+                        <option>Spanish</option>
+                        <option>French</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Time Zone</label>
+                      <select class="form-input">
+                        <option>Pacific Time (UTC-8)</option>
+                        <option>Eastern Time (UTC-5)</option>
+                        <option>UTC</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="settings-panel" id="notification-settings">
+              <h2 class="panel-title">Notification Preferences</h2>
+
+              <div class="settings-section">
+                <div class="notification-group">
+                  <div class="notification-option">
+                    <div class="option-info">
+                      <h3>Course Updates</h3>
+                      <p>
+                        Get notified about student enrollments and course
+                        activity
+                      </p>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked />
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="notification-option">
+                    <div class="option-info">
+                      <h3>Student Messages</h3>
+                      <p>Receive notifications for new student messages</p>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked />
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="notification-option">
+                    <div class="option-info">
+                      <h3>Reviews & Ratings</h3>
+                      <p>Get notified when students review your courses</p>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked />
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="notification-option">
+                    <div class="option-info">
+                      <h3>Earnings Updates</h3>
+                      <p>Notifications about earnings and payouts</p>
+                    </div>
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked />
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h3>Email Notification Frequency</h3>
+                <div class="settings-group">
+                  <select class="form-input">
+                    <option>Immediately</option>
+                    <option>Daily Digest</option>
+                    <option>Weekly Summary</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payout Settings -->
+            <div class="settings-panel" id="payout-settings">
+              <h2 class="panel-title">Payout Settings</h2>
+
+              <div class="settings-section">
+                <h3>Payment Method</h3>
+                <div class="payment-methods">
+                  <div class="payment-method">
+                    <input type="radio" name="payment" id="paypal" checked />
+                    <label for="paypal">
+                      <span class="method-name">PayPal</span>
+                      <span class="method-email">sarah@example.com</span>
+                    </label>
+                    <button class="btn-secondary">Edit</button>
+                  </div>
+
+                  <div class="payment-method">
+                    <input type="radio" name="payment" id="bank" />
+                    <label for="bank">
+                      <span class="method-name">Bank Transfer</span>
+                      <span class="method-details"
+                        >Setup your bank account</span
+                      >
+                    </label>
+                    <button class="btn-secondary">Setup</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h3>Payout Schedule</h3>
+                <div class="settings-group">
+                  <select class="form-input">
+                    <option>Monthly (15th of each month)</option>
+                    <option>Bi-weekly</option>
+                    <option>Weekly</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="toast-container"></div>
     </main>
 
     <script>
@@ -653,6 +4503,850 @@
           document.getElementById(sectionId).classList.add("active");
         });
       });
+    </script>
+
+    <script>
+      // Modal functionality
+      const modal = document.getElementById("createCourseModal");
+      const createBtn = document.querySelector(".create-course-btn");
+      const closeBtn = document.querySelector(".close-modal");
+      const cancelBtn = document.getElementById("cancelCreate");
+
+      createBtn.addEventListener("click", () => {
+        modal.classList.add("active");
+      });
+
+      closeBtn.addEventListener("click", () => {
+        modal.classList.remove("active");
+      });
+
+      cancelBtn.addEventListener("click", () => {
+        modal.classList.remove("active");
+      });
+
+      // Course filters functionality
+      document.querySelectorAll(".filter-btn").forEach((button) => {
+        button.addEventListener("click", () => {
+          document
+            .querySelector(".filter-btn.active")
+            .classList.remove("active");
+          button.classList.add("active");
+          // Add filter logic here
+        });
+      });
+
+      // Form submission
+      document
+        .getElementById("createCourseForm")
+        .addEventListener("submit", (e) => {
+          e.preventDefault();
+          // Add form submission logic here
+          modal.classList.remove("active");
+        });
+
+      // Close modal when clicking outside
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+          modal.classList.remove("active");
+        }
+      });
+    </script>
+
+    <script>
+      // Chart controls functionality
+      document.querySelectorAll(".chart-btn").forEach((button) => {
+        button.addEventListener("click", () => {
+          document
+            .querySelector(".chart-btn.active")
+            .classList.remove("active");
+          button.classList.add("active");
+          // Add chart update logic here
+        });
+      });
+
+      // Payout filter functionality
+      document
+        .querySelector(".payout-filter")
+        .addEventListener("change", (e) => {
+          // Add payout filtering logic here
+        });
+    </script>
+
+    <script>
+      // Settings navigation
+      document.querySelectorAll(".settings-link").forEach((link) => {
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+
+          // Remove active class from all links and panels
+          document
+            .querySelectorAll(".settings-link")
+            .forEach((l) => l.classList.remove("active"));
+          document
+            .querySelectorAll(".settings-panel")
+            .forEach((p) => p.classList.remove("active"));
+
+          // Add active class to clicked link
+          link.classList.add("active");
+
+          // Show corresponding panel
+          const panelId = link.getAttribute("href").substring(1) + "-settings";
+          document.getElementById(panelId).classList.add("active");
+        });
+      });
+
+      // Form handling
+      document.querySelectorAll(".settings-form").forEach((form) => {
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+          // Add form submission logic here
+        });
+      });
+    </script>
+
+    <script>
+      // Notification functionality
+      document.querySelectorAll(".notification-bell").forEach((bell) => {
+        bell.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const wrapper = bell.closest(".notification-wrapper");
+          wrapper.classList.toggle("active");
+        });
+      });
+
+      // Close notification dropdown when clicking outside
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".notification-wrapper")) {
+          document
+            .querySelectorAll(".notification-wrapper")
+            .forEach((wrapper) => {
+              wrapper.classList.remove("active");
+            });
+        }
+      });
+
+      // Mark single notification as read
+      document.querySelectorAll(".mark-read").forEach((button) => {
+        button.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const notification = button.closest(".notification-item");
+          notification.classList.remove("unread");
+          updateNotificationCount();
+        });
+      });
+
+      // Mark all notifications as read
+      document.querySelectorAll(".mark-all-read").forEach((button) => {
+        button.addEventListener("click", () => {
+          const wrapper = button.closest(".notification-wrapper");
+          wrapper.querySelectorAll(".notification-item").forEach((item) => {
+            item.classList.remove("unread");
+          });
+          updateNotificationCount();
+        });
+      });
+
+      // Update notification badge count
+      function updateNotificationCount() {
+        const badges = document.querySelectorAll(".notification-badge");
+        badges.forEach((badge) => {
+          const wrapper = badge.closest(".notification-wrapper");
+          const unreadCount = wrapper.querySelectorAll(
+            ".notification-item.unread"
+          ).length;
+          badge.textContent = unreadCount;
+          if (unreadCount === 0) {
+            badge.style.display = "none";
+          } else {
+            badge.style.display = "block";
+          }
+        });
+      }
+
+      // Initialize notification count
+      updateNotificationCount();
+    </script>
+
+    <script>
+      // Global functionality for common actions
+      const PortalFunctions = {
+        // Search functionality
+        initializeSearch: (searchInput, itemsContainer, itemSelector) => {
+          searchInput.addEventListener("input", (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const items = itemsContainer.querySelectorAll(itemSelector);
+
+            items.forEach((item) => {
+              const searchableText = item.textContent.toLowerCase();
+              item.style.display = searchableText.includes(searchTerm)
+                ? ""
+                : "none";
+            });
+          });
+        },
+
+        // Filter functionality
+        initializeFilters: (filterButtons, itemsContainer, itemSelector) => {
+          filterButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+              const filterValue = button.getAttribute("data-filter");
+              const items = itemsContainer.querySelectorAll(itemSelector);
+
+              filterButtons.forEach((btn) => btn.classList.remove("active"));
+              button.classList.add("active");
+
+              items.forEach((item) => {
+                if (filterValue === "all") {
+                  item.style.display = "";
+                } else {
+                  const itemStatus = item.getAttribute("data-status");
+                  item.style.display = itemStatus === filterValue ? "" : "none";
+                }
+              });
+            });
+          });
+        },
+
+        // Modal functionality
+        initializeModal: (modalId) => {
+          const modal = document.getElementById(modalId);
+          const openButtons = document.querySelectorAll(
+            `[data-modal="${modalId}"]`
+          );
+          const closeButtons = modal.querySelectorAll(
+            ".close-modal, .cancel-btn"
+          );
+
+          openButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+              modal.classList.add("active");
+            });
+          });
+
+          closeButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+              modal.classList.remove("active");
+            });
+          });
+
+          modal.addEventListener("click", (e) => {
+            if (e.target === modal) {
+              modal.classList.remove("active");
+            }
+          });
+        },
+
+        // Export functionality
+        exportData: (data, filename) => {
+          const blob = new Blob([JSON.stringify(data, null, 2)], {
+            type: "application/json",
+          });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        },
+
+        // File upload functionality
+        initializeFileUpload: (inputElement, previewElement) => {
+          inputElement.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                previewElement.src = e.target.result;
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+        },
+
+        // Form submission handler
+        handleFormSubmission: (form, successCallback, errorCallback) => {
+          form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+              // Simulate API call
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+              successCallback(data);
+              form.reset();
+            } catch (error) {
+              errorCallback(error);
+            }
+          });
+        },
+
+        // Checkbox selection functionality
+        initializeCheckboxSelection: (selectAllCheckbox, itemCheckboxes) => {
+          selectAllCheckbox.addEventListener("change", () => {
+            itemCheckboxes.forEach((checkbox) => {
+              checkbox.checked = selectAllCheckbox.checked;
+            });
+          });
+
+          itemCheckboxes.forEach((checkbox) => {
+            checkbox.addEventListener("change", () => {
+              const allChecked = Array.from(itemCheckboxes).every(
+                (cb) => cb.checked
+              );
+              selectAllCheckbox.checked = allChecked;
+            });
+          });
+        },
+
+        // Action menu functionality
+        initializeActionMenu: (menuButton, menuContent) => {
+          menuButton.addEventListener("click", (e) => {
+            e.stopPropagation();
+            menuContent.classList.toggle("active");
+          });
+
+          document.addEventListener("click", () => {
+            menuContent.classList.remove("active");
+          });
+        },
+
+        // Chart initialization
+        initializeChart: (container, data, options) => {
+          // Example using a simple canvas-based chart
+          const canvas = document.createElement("canvas");
+          container.appendChild(canvas);
+          const ctx = canvas.getContext("2d");
+          // Draw chart based on data and options
+        },
+
+        // Toggle switch functionality
+        initializeToggleSwitch: (toggleSwitch, callback) => {
+          toggleSwitch.addEventListener("change", () => {
+            const isChecked = toggleSwitch.checked;
+            callback(isChecked);
+          });
+        },
+      };
+
+      // Initialize all functionalities
+      document.addEventListener("DOMContentLoaded", () => {
+        // Dashboard functionality
+        const createCourseBtn = document.querySelector(
+          '[data-action="create-course"]'
+        );
+        if (createCourseBtn) {
+          createCourseBtn.addEventListener("click", () => {
+            PortalFunctions.initializeModal("createCourseModal");
+          });
+        }
+
+        // Course management functionality
+        const courseFilters = document.querySelectorAll(
+          ".filter-btn[data-filter]"
+        );
+        const courseContainer = document.querySelector(".course-list");
+        if (courseFilters && courseContainer) {
+          PortalFunctions.initializeFilters(
+            courseFilters,
+            courseContainer,
+            ".course-item"
+          );
+        }
+
+        // Search functionality
+        const searchInputs = document.querySelectorAll(".search-box input");
+        searchInputs.forEach((input) => {
+          const container = input
+            .closest("section")
+            .querySelector(".course-list, .student-list, .assignment-list");
+          if (container) {
+            PortalFunctions.initializeSearch(
+              input,
+              container,
+              ".course-item, .student-item, .assignment-item"
+            );
+          }
+        });
+
+        // File upload functionality
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        fileInputs.forEach((input) => {
+          const preview = input.closest("form").querySelector(".preview-image");
+          if (preview) {
+            PortalFunctions.initializeFileUpload(input, preview);
+          }
+        });
+
+        // Form submissions
+        const forms = document.querySelectorAll("form");
+        forms.forEach((form) => {
+          PortalFunctions.handleFormSubmission(
+            form,
+            (data) => {
+              // Show success message
+              console.log("Form submitted:", data);
+            },
+            (error) => {
+              // Show error message
+              console.error("Form error:", error);
+            }
+          );
+        });
+
+        // Export functionality
+        const exportButtons = document.querySelectorAll("[data-export]");
+        exportButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            const dataType = button.getAttribute("data-export");
+            const data = {
+              timestamp: new Date().toISOString(),
+              type: dataType,
+              content: "Sample export data",
+            };
+            PortalFunctions.exportData(
+              data,
+              `${dataType}-export-${Date.now()}.json`
+            );
+          });
+        });
+
+        // Action menus
+        const actionButtons = document.querySelectorAll(".action-btn");
+        actionButtons.forEach((button) => {
+          const menu = button.nextElementSibling;
+          if (menu && menu.classList.contains("action-menu")) {
+            PortalFunctions.initializeActionMenu(button, menu);
+          }
+        });
+
+        // Toggle switches
+        const toggleSwitches = document.querySelectorAll(
+          ".toggle-switch input"
+        );
+        toggleSwitches.forEach((toggle) => {
+          PortalFunctions.initializeToggleSwitch(toggle, (isChecked) => {
+            console.log(
+              `Toggle ${toggle.id} is now ${isChecked ? "on" : "off"}`
+            );
+          });
+        });
+      });
+
+      // Export the PortalFunctions object for use in other scripts
+      window.PortalFunctions = PortalFunctions;
+    </script>
+
+    <script>
+      // Dashboard Handlers
+      const DashboardHandlers = {
+        init() {
+          // Recent Activity
+          this.initCreateCourse();
+          this.initViewDetails();
+          this.initReviews();
+          this.initSchedule();
+        },
+
+        initCreateCourse() {
+          const createBtn = document.querySelector(
+            '[data-action="create-course"]'
+          );
+          if (createBtn) {
+            createBtn.addEventListener("click", () => {
+              // Show create course modal
+              const modal = document.getElementById("createCourseModal");
+              modal.classList.add("active");
+            });
+          }
+        },
+
+        initViewDetails() {
+          const viewDetailsBtn = document.querySelector(
+            '[data-action="view-engagement"]'
+          );
+          if (viewDetailsBtn) {
+            viewDetailsBtn.addEventListener("click", () => {
+              // Navigate to analytics section with engagement focus
+              document.querySelector('[href="#analytics"]').click();
+            });
+          }
+        },
+
+        initReviews() {
+          const viewAllBtn = document.querySelector(
+            '[data-action="view-reviews"]'
+          );
+          if (viewAllBtn) {
+            viewAllBtn.addEventListener("click", () => {
+              // Show all reviews in a modal
+              this.showReviewsModal();
+            });
+          }
+        },
+
+        initSchedule() {
+          const addEventBtn = document.querySelector(
+            '[data-action="add-event"]'
+          );
+          if (addEventBtn) {
+            addEventBtn.addEventListener("click", () => {
+              // Show add event modal
+              this.showAddEventModal();
+            });
+          }
+        },
+
+        showReviewsModal() {
+          // Implementation for reviews modal
+        },
+
+        showAddEventModal() {
+          // Implementation for add event modal
+        },
+      };
+
+      // Course Management Handlers
+      const CourseHandlers = {
+        init() {
+          this.initFilters();
+          this.initSearch();
+          this.initCourseActions();
+          this.initCreateCourse();
+        },
+
+        initFilters() {
+          const filterBtns = document.querySelectorAll(
+            ".course-filters .filter-btn"
+          );
+          filterBtns.forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const filter = btn.dataset.filter;
+              this.filterCourses(filter);
+            });
+          });
+        },
+
+        filterCourses(filter) {
+          const courses = document.querySelectorAll(".course-item");
+          courses.forEach((course) => {
+            const status = course.dataset.status;
+            course.style.display =
+              filter === "all" || status === filter ? "flex" : "none";
+          });
+        },
+
+        initSearch() {
+          const searchInput = document.querySelector(".course-search input");
+          if (searchInput) {
+            searchInput.addEventListener("input", (e) => {
+              this.searchCourses(e.target.value);
+            });
+          }
+        },
+
+        searchCourses(query) {
+          const courses = document.querySelectorAll(".course-item");
+          courses.forEach((course) => {
+            const title = course
+              .querySelector(".course-title")
+              .textContent.toLowerCase();
+            course.style.display = title.includes(query.toLowerCase())
+              ? "flex"
+              : "none";
+          });
+        },
+
+        initCourseActions() {
+          const actionBtns = document.querySelectorAll(
+            ".course-actions button"
+          );
+          actionBtns.forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+              const action = btn.dataset.action;
+              const courseId = btn.closest(".course-item").dataset.id;
+              this.handleCourseAction(action, courseId);
+            });
+          });
+        },
+
+        handleCourseAction(action, courseId) {
+          switch (action) {
+            case "edit":
+              this.editCourse(courseId);
+              break;
+            case "view":
+              this.viewCourse(courseId);
+              break;
+            case "delete":
+              this.deleteCourse(courseId);
+              break;
+            // Add more actions as needed
+          }
+        },
+
+        editCourse(courseId) {
+          // Show edit course modal
+        },
+
+        viewCourse(courseId) {
+          // Navigate to course view
+        },
+
+        deleteCourse(courseId) {
+          // Show delete confirmation modal
+        },
+      };
+
+      // Student Management Handlers
+      const StudentHandlers = {
+        init() {
+          this.initFilters();
+          this.initSearch();
+          this.initBulkActions();
+          this.initStudentActions();
+        },
+
+        initFilters() {
+          // Implementation similar to course filters
+        },
+
+        initSearch() {
+          // Implementation similar to course search
+        },
+
+        initBulkActions() {
+          const selectAll = document.querySelector(".select-all");
+          if (selectAll) {
+            selectAll.addEventListener("change", (e) => {
+              this.toggleAllStudents(e.target.checked);
+            });
+          }
+        },
+
+        initStudentActions() {
+          // Implementation for individual student actions
+        },
+      };
+
+      // Assignment Handlers
+      const AssignmentHandlers = {
+        init() {
+          this.initCreateAssignment();
+          this.initGrading();
+          this.initFilters();
+        },
+
+        initCreateAssignment() {
+          // Implementation for creating assignments
+        },
+
+        initGrading() {
+          // Implementation for grading functionality
+        },
+
+        initFilters() {
+          // Implementation for assignment filters
+        },
+      };
+
+      // Analytics Handlers
+      const AnalyticsHandlers = {
+        init() {
+          this.initCharts();
+          this.initDateRanges();
+          this.initExport();
+        },
+
+        initCharts() {
+          // Implementation for various charts
+        },
+
+        initDateRanges() {
+          // Implementation for date range selection
+        },
+
+        initExport() {
+          // Implementation for analytics export
+        },
+      };
+
+      // Discussion Handlers
+      const DiscussionHandlers = {
+        init() {
+          this.initNewPost();
+          this.initReplies();
+          this.initModeration();
+        },
+
+        initNewPost() {
+          // Implementation for creating new posts
+        },
+
+        initReplies() {
+          // Implementation for reply functionality
+        },
+
+        initModeration() {
+          // Implementation for moderation tools
+        },
+      };
+
+      // Earnings Handlers
+      const EarningsHandlers = {
+        init() {
+          this.initPayouts();
+          this.initReports();
+          this.initFilters();
+        },
+
+        initPayouts() {
+          // Implementation for payout functionality
+        },
+
+        initReports() {
+          // Implementation for financial reports
+        },
+
+        initFilters() {
+          // Implementation for earnings filters
+        },
+      };
+
+      // Settings Handlers
+      const SettingsHandlers = {
+        init() {
+          this.initProfileUpdate();
+          this.initNotifications();
+          this.initSecurity();
+          this.initPaymentMethods();
+        },
+
+        initProfileUpdate() {
+          const profileForm = document.querySelector("#profile-form");
+          if (profileForm) {
+            profileForm.addEventListener("submit", (e) => {
+              e.preventDefault();
+              this.handleProfileUpdate(new FormData(profileForm));
+            });
+          }
+        },
+
+        initNotifications() {
+          const toggles = document.querySelectorAll(".notification-toggle");
+          toggles.forEach((toggle) => {
+            toggle.addEventListener("change", (e) => {
+              this.updateNotificationSettings(e.target.name, e.target.checked);
+            });
+          });
+        },
+
+        initSecurity() {
+          const passwordForm = document.querySelector("#security-form");
+          if (passwordForm) {
+            passwordForm.addEventListener("submit", (e) => {
+              e.preventDefault();
+              this.handlePasswordUpdate(new FormData(passwordForm));
+            });
+          }
+        },
+
+        initPaymentMethods() {
+          // Implementation for payment method management
+        },
+
+        async handleProfileUpdate(formData) {
+          try {
+            // Simulate API call
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            showSuccess("Profile updated successfully");
+          } catch (error) {
+            showError("Failed to update profile");
+          }
+        },
+
+        async updateNotificationSettings(setting, enabled) {
+          try {
+            // Simulate API call
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            showSuccess("Notification settings updated");
+          } catch (error) {
+            showError("Failed to update notification settings");
+          }
+        },
+
+        async handlePasswordUpdate(formData) {
+          try {
+            // Simulate API call
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            showSuccess("Password updated successfully");
+          } catch (error) {
+            showError("Failed to update password");
+          }
+        },
+      };
+
+      // Utility Functions
+      function showSuccess(message) {
+        // Implementation for success toast/notification
+        console.log("Success:", message);
+      }
+
+      function showError(message) {
+        // Implementation for error toast/notification
+        console.error("Error:", message);
+      }
+
+      // Initialize all handlers when the document is ready
+      document.addEventListener("DOMContentLoaded", () => {
+        DashboardHandlers.init();
+        CourseHandlers.init();
+        StudentHandlers.init();
+        AssignmentHandlers.init();
+        AnalyticsHandlers.init();
+        DiscussionHandlers.init();
+        EarningsHandlers.init();
+        SettingsHandlers.init();
+      });
+    </script>
+
+    <script>
+      function showToast(message, type = "success") {
+        const container = document.querySelector(".toast-container");
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+
+        const icon = type === "success" ? "✓" : "✕";
+
+        toast.innerHTML = `
+                <span class="toast-icon">${icon}</span>
+                <span class="toast-message">${message}</span>
+                <button class="toast-close">×</button>
+            `;
+
+        container.appendChild(toast);
+
+        // Remove toast after 3 seconds
+        setTimeout(() => {
+          toast.remove();
+        }, 3000);
+
+        // Close button functionality
+        toast.querySelector(".toast-close").addEventListener("click", () => {
+          toast.remove();
+        });
+      }
+
+      // Update the utility functions
+      function showSuccess(message) {
+        showToast(message, "success");
+      }
+
+      function showError(message) {
+        showToast(message, "error");
+      }
     </script>
   </body>
 </html>

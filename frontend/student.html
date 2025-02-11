@@ -2661,5 +2661,67 @@ Passionate learner interested in web development and data science.</textarea
         });
       });
     </script>
+    <script>
+      // Notification functionality
+      document.querySelectorAll(".notification-bell").forEach((bell) => {
+        bell.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const wrapper = bell.closest(".notification-wrapper");
+          wrapper.classList.toggle("active");
+        });
+      });
+
+      // Close notification dropdown when clicking outside
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".notification-wrapper")) {
+          document
+            .querySelectorAll(".notification-wrapper")
+            .forEach((wrapper) => {
+              wrapper.classList.remove("active");
+            });
+        }
+      });
+
+      // Mark single notification as read
+      document.querySelectorAll(".mark-read").forEach((button) => {
+        button.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const notification = button.closest(".notification-item");
+          notification.classList.remove("unread");
+          updateNotificationCount();
+        });
+      });
+
+      // Mark all notifications as read
+      document.querySelectorAll(".mark-all-read").forEach((button) => {
+        button.addEventListener("click", () => {
+          const wrapper = button.closest(".notification-wrapper");
+          wrapper.querySelectorAll(".notification-item").forEach((item) => {
+            item.classList.remove("unread");
+          });
+          updateNotificationCount();
+        });
+      });
+
+      // Update notification badge count
+      function updateNotificationCount() {
+        const badges = document.querySelectorAll(".notification-badge");
+        badges.forEach((badge) => {
+          const wrapper = badge.closest(".notification-wrapper");
+          const unreadCount = wrapper.querySelectorAll(
+            ".notification-item.unread"
+          ).length;
+          badge.textContent = unreadCount;
+          if (unreadCount === 0) {
+            badge.style.display = "none";
+          } else {
+            badge.style.display = "block";
+          }
+        });
+      }
+
+      // Initialize notification count
+      updateNotificationCount();
+    </script>
   </body>
 </html>
