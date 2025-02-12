@@ -2405,6 +2405,76 @@
           opacity: 0;
         }
       }
+
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+
+      .modal.active {
+        display: flex;
+      }
+
+      .modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #64748b;
+      }
+
+      /* Toast Styles */
+      .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+      }
+
+      .toast {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .toast.success {
+        border-left: 4px solid #22c55e;
+      }
+
+      .toast.error {
+        border-left: 4px solid #ef4444;
+      }
     </style>
   </head>
   <body>
@@ -2584,7 +2654,7 @@
           <div class="dashboard-card">
             <div class="card-header">
               <h2>Recent Course Activity</h2>
-              <button class="btn-primary">Create Course</button>
+              <button class="btn-primary">View</button>
             </div>
             <!-- Add course activity content -->
           </div>
@@ -2616,6 +2686,75 @@
             <!-- Add schedule content -->
           </div>
         </div>
+
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h2>Course Management</h2>
+            <button class="create-course-btn" onclick="openCreateCourseModal()">
+              <span>+</span> Create Course
+            </button>
+          </div>
+        </div>
+
+        <!-- Create Course Modal -->
+        <div id="createCourseModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Create New Course</h2>
+              <button class="close-modal" onclick="closeCreateCourseModal()">
+                ×
+              </button>
+            </div>
+            <form id="createCourseForm" onsubmit="handleCreateCourse(event)">
+              <div class="form-group">
+                <label for="courseTitle">Course Title</label>
+                <input
+                  type="text"
+                  id="courseTitle"
+                  name="title"
+                  required
+                  class="form-input"
+                />
+              </div>
+              <div class="form-group">
+                <label for="courseDescription">Description</label>
+                <textarea
+                  id="courseDescription"
+                  name="description"
+                  required
+                  class="form-input"
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <label for="courseCategory">Category</label>
+                <select
+                  id="courseCategory"
+                  name="category"
+                  required
+                  class="form-input"
+                >
+                  <option value="">Select Category</option>
+                  <option value="web-development">Web Development</option>
+                  <option value="data-science">Data Science</option>
+                  <option value="design">Design</option>
+                </select>
+              </div>
+              <div class="form-actions">
+                <button
+                  type="button"
+                  class="btn-secondary"
+                  onclick="closeCreateCourseModal()"
+                >
+                  Cancel
+                </button>
+                <button type="submit" class="btn-primary">Create Course</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Toast Container -->
+        <div class="toast-container" id="toastContainer"></div>
       </section>
 
       <!-- Courses Section -->
@@ -5347,6 +5486,62 @@ Experienced web developer and instructor with over 10 years of industry experien
       function showError(message) {
         showToast(message, "error");
       }
+    </script>
+
+    <script>
+      // Modal Functions
+      function openCreateCourseModal() {
+        document.getElementById("createCourseModal").classList.add("active");
+      }
+
+      function closeCreateCourseModal() {
+        document.getElementById("createCourseModal").classList.remove("active");
+      }
+
+      // Form Handler
+      function handleCreateCourse(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        const courseData = Object.fromEntries(formData.entries());
+
+        // Simulate API call
+        setTimeout(() => {
+          console.log("Course created:", courseData);
+          showToast("Course created successfully!", "success");
+          closeCreateCourseModal();
+          form.reset();
+        }, 1000);
+      }
+
+      // Toast Function
+      function showToast(message, type = "success") {
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+                <span class="toast-icon">${
+                  type === "success" ? "✓" : "✕"
+                }</span>
+                <span class="toast-message">${message}</span>
+            `;
+
+        const container = document.getElementById("toastContainer");
+        container.appendChild(toast);
+
+        // Remove toast after 3 seconds
+        setTimeout(() => {
+          toast.remove();
+        }, 3000);
+      }
+
+      // Close modal when clicking outside
+      document
+        .getElementById("createCourseModal")
+        .addEventListener("click", (e) => {
+          if (e.target === e.currentTarget) {
+            closeCreateCourseModal();
+          }
+        });
     </script>
   </body>
 </html>
