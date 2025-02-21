@@ -3,6 +3,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>iLearn - Sign Up</title>
+    <!-- Firebase SDKs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.js"></script>
+
     <style>
       /* Same styles as before */
       @import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css");
@@ -266,6 +271,13 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
+
+      .error-message {
+        color: #dc2626;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -308,7 +320,7 @@
             </label>
           </div>
         </div>
-        <form>
+        <form id="signupForm">
           <div class="form-group">
             <label for="name">Full Name</label>
             <input
@@ -318,6 +330,7 @@
               required
               placeholder="Enter your full name"
             />
+            <div id="nameError" class="error-message"></div>
           </div>
           <div class="form-group">
             <label for="signup-email">Email</label>
@@ -328,6 +341,7 @@
               required
               placeholder="Enter your email"
             />
+            <div id="emailError" class="error-message"></div>
           </div>
           <div class="form-group">
             <label for="signup-password">Password</label>
@@ -337,7 +351,9 @@
               name="password"
               required
               placeholder="Create a password"
+              minlength="6"
             />
+            <div id="passwordError" class="error-message"></div>
           </div>
           <div class="form-group">
             <label for="confirm-password">Confirm Password</label>
@@ -348,6 +364,7 @@
               required
               placeholder="Confirm your password"
             />
+            <div id="confirmPasswordError" class="error-message"></div>
           </div>
           <button type="submit" class="submit-btn">Sign Up</button>
           <div class="auth-links">
@@ -356,12 +373,227 @@
           <div class="social-login">
             <p>Or sign up with</p>
             <div class="social-buttons">
-              <button type="button" class="social-btn">Google</button>
-              <button type="button" class="social-btn">GitHub</button>
+              <button type="button" class="social-btn" id="googleSignUp">
+                Google
+              </button>
+              <button type="button" class="social-btn" id="githubSignUp">
+                GitHub
+              </button>
             </div>
           </div>
         </form>
       </div>
     </div>
+
+    <script>
+      // Firebase configuration - Replace with your config
+      const firebaseConfig = {
+        apiKey: "AIzaSyDUZ9JQgfK4tx1dNZTKjpXdujWaazZTEOI",
+        authDomain: "ilearn-af4eb.firebaseapp.com",
+        databaseURL: "https://ilearn-af4eb-default-rtdb.firebaseio.com",
+        projectId: "ilearn-af4eb",
+        storageBucket: "ilearn-af4eb.firebasestorage.app",
+        messagingSenderId: "291415286107",
+        appId: "1:291415286107:web:3d85fef75c10f24d5ffa7e",
+        measurementId: "G-RDN0255N28",
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+
+      // Get references to auth and database
+      const auth = firebase.auth();
+      const database = firebase.database();
+
+      // Helper functions
+      function showError(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        errorElement.textContent = message;
+        errorElement.style.display = "block";
+      }
+
+      function clearErrors() {
+        const errorElements = document.getElementsByClassName("error-message");
+        Array.from(errorElements).forEach((element) => {
+          element.style.display = "none";
+          element.textContent = "";
+        });
+      }
+
+      function getSelectedRole() {
+        return document.querySelector('input[name="role"]:checked').value;
+      }
+
+      async function checkIfUserExists(email) {
+        try {
+          const methods = await auth.fetchSignInMethodsForEmail(email);
+          return methods.length > 0;
+        } catch (error) {
+          console.error("Error checking email existence:", error);
+          return false;
+        }
+      }
+
+      // Form submission handler
+      document
+        .getElementById("signupForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          clearErrors();
+
+          const name = document.getElementById("name").value;
+          const email = document.getElementById("signup-email").value;
+          const password = document.getElementById("signup-password").value;
+          const confirmPassword =
+            document.getElementById("confirm-password").value;
+          const role = getSelectedRole();
+
+          // Basic validation
+          if (password !== confirmPassword) {
+            showError("confirmPasswordError", "Passwords do not match");
+            return;
+          }
+
+          if (password.length < 6) {
+            showError(
+              "passwordError",
+              "Password must be at least 6 characters"
+            );
+            return;
+          }
+
+          try {
+            // Check if user exists
+            const userExists = await checkIfUserExists(email);
+            if (userExists) {
+              showError(
+                "emailError",
+                "This email is already registered. Please sign in instead."
+              );
+              setTimeout(() => {
+                window.location.href = "signin.html";
+              }, 2000);
+              return;
+            }
+
+            // Create user
+            const userCredential = await auth.createUserWithEmailAndPassword(
+              email,
+              password
+            );
+            const user = userCredential.user;
+
+            // Update profile
+            await user.updateProfile({
+              displayName: name,
+            });
+
+            // Store in database
+            await database.ref("users/" + user.uid).set({
+              email: user.email,
+              name: name,
+              role: role,
+              createdAt: firebase.database.ServerValue.TIMESTAMP,
+              lastLogin: firebase.database.ServerValue.TIMESTAMP,
+            });
+
+            // Redirect based on role
+            window.location.href =
+              role === "student" ? "student.html" : "instructor.html";
+          } catch (error) {
+            console.error(error);
+            switch (error.code) {
+              case "auth/email-already-in-use":
+                showError("emailError", "Email is already registered");
+                break;
+              case "auth/invalid-email":
+                showError("emailError", "Invalid email format");
+                break;
+              case "auth/weak-password":
+                showError("passwordError", "Password is too weak");
+                break;
+              default:
+                alert("Error: " + error.message);
+            }
+          }
+        });
+
+      // Google Sign Up
+      document
+        .getElementById("googleSignUp")
+        .addEventListener("click", async () => {
+          try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            const result = await auth.signInWithPopup(provider);
+
+            if (!result.additionalUserInfo.isNewUser) {
+              alert(
+                "This Google account is already registered. Redirecting to sign in..."
+              );
+              setTimeout(() => {
+                window.location.href = "signin.html";
+              }, 2000);
+              return;
+            }
+
+            const user = result.user;
+            const role = getSelectedRole();
+
+            // Store in database
+            await database.ref("users/" + user.uid).set({
+              email: user.email,
+              name: user.displayName,
+              role: role,
+              createdAt: firebase.database.ServerValue.TIMESTAMP,
+              lastLogin: firebase.database.ServerValue.TIMESTAMP,
+            });
+
+            // Redirect based on role
+            window.location.href =
+              role === "student" ? "student.html" : "instructor.html";
+          } catch (error) {
+            console.error(error);
+            alert("Error signing up with Google: " + error.message);
+          }
+        });
+
+      // GitHub Sign Up
+      document
+        .getElementById("githubSignUp")
+        .addEventListener("click", async () => {
+          try {
+            const provider = new firebase.auth.GithubAuthProvider();
+            const result = await auth.signInWithPopup(provider);
+
+            if (!result.additionalUserInfo.isNewUser) {
+              alert(
+                "This GitHub account is already registered. Redirecting to sign in..."
+              );
+              setTimeout(() => {
+                window.location.href = "signin.html";
+              }, 2000);
+              return;
+            }
+
+            const user = result.user;
+            const role = getSelectedRole();
+
+            // Store in database
+            await database.ref("users/" + user.uid).set({
+              email: user.email,
+              name: user.displayName,
+              role: role,
+              createdAt: firebase.database.ServerValue.TIMESTAMP,
+              lastLogin: firebase.database.ServerValue.TIMESTAMP,
+            });
+
+            // Redirect based on role
+            window.location.href =
+              role === "student" ? "student.html" : "instructor.html";
+          } catch (error) {
+            console.error(error);
+            alert("Error signing up with GitHub: " + error.message);
+          }
+        });
+    </script>
   </body>
 </html>

@@ -1,35 +1,1028 @@
-// Global State
+// Global error handler
+window.addEventListener('error', (event) => {
+    console.error('Global error:', event.error);
+    // Prevent showing multiple error toasts
+    if (!window.hasShownError) {
+        showToast('An error occurred. Please refresh the page.', 'error');
+        window.hasShownError = true;
+        setTimeout(() => window.hasShownError = false, 5000);
+    }
+});
+
+// Add null checks to element selectors
+function safeQuerySelector(selector) {
+    const element = document.querySelector(selector);
+    if (!element) {
+        console.warn(`Element not found: ${selector}`);
+        return null;
+    }
+    return element;
+}
+
+// Modify DOM operations to use safe selectors
+function updateUI(elementId, value) {
+    const element = safeQuerySelector(`#${elementId}`);
+    if (element) {
+        element.textContent = value;
+    }
+}
+
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDUZ9JQgfK4tx1dNZTKjpXdujWaazZTEOI",
+    authDomain: "ilearn-af4eb.firebaseapp.com",
+    databaseURL: "https://ilearn-af4eb-default-rtdb.firebaseio.com",
+    projectId: "ilearn-af4eb",
+    storageBucket: "ilearn-af4eb.firebasestorage.app",
+    messagingSenderId: "291415286107",
+    appId: "1:291415286107:web:3d85fef75c10f24d5ffa7e"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const database = firebase.database();
+
+// Global state
+let currentUser = null;
 let currentSection = 'dashboard';
-let currentTopicId = null;
-let currentCourseId = null;
 
-// Navigation Functions
-function switchSection(sectionId) {
-    // Remove active class from all sections and nav links
-    document.querySelectorAll('.content-section').forEach(section => {
-        section.classList.remove('active');
+// Check authentication on page load
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
+    initializeEventListeners();
+});
+
+// Authentication Check
+function checkAuth() {
+    showLoading();
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.href = 'signin.html';
+            return;
+        }
+
+        try {
+            // Check if user is an instructor
+            const userRef = database.ref(`users/${user.uid}`);
+            const snapshot = await userRef.get();
+            const userData = snapshot.val();
+
+            if (!userData || userData.role !== 'instructor') {
+                await auth.signOut();
+                window.location.href = 'signin.html';
+                return;
+            }
+
+            currentUser = user;
+            updateUserDisplay(userData);
+            initializeInstructorPortal(userData);
+        } catch (error) {
+            console.error("Auth check error:", error);
+            showToast('Error verifying credentials', 'error');
+            window.location.href = 'signin.html';
+        } finally {
+            hideLoading();
+        }
     });
+}
+
+// Initialize Instructor Portal
+async function initializeInstructorPortal(userData) {
+    try {
+        // Update profile UI
+        updateUserDisplay(userData);
+        
+        // Set up real-time listeners
+        setupDataListeners(userData.uid);
+        
+        // Load initial dashboard data
+        await loadDashboardData(userData.uid);
+
+        // Initialize charts if they exist
+        initializeCharts();
+
+    } catch (error) {
+        console.error("Error initializing portal:", error);
+        showToast('Error loading portal data', 'error');
+    }
+}
+
+// Update User Display
+function updateUserDisplay(userData) {
+    // Update sidebar profile
+    document.getElementById('userName').textContent = userData.name;
+    document.getElementById('userEmail').textContent = userData.email;
+    document.getElementById('welcomeMessage').textContent = `Welcome back, ${userData.name}! 👋`;
+
+    // Update profile image if exists
+    if (userData.avatar) {
+        document.getElementById('userProfileImage').src = userData.avatar;
+    }
+}
+
+// Setup Real-time Data Listeners
+function setupDataListeners(userId) {
+    // Courses Listener
+    const coursesRef = database.ref(`courses/${userId}`);
+    coursesRef.on('value', snapshot => {
+        updateCoursesList(snapshot.val());
+    });
+
+    // Students Listener
+    const studentsRef = database.ref(`instructorStudents/${userId}`);
+    studentsRef.on('value', snapshot => {
+        updateStudentsList(snapshot.val());
+    });
+
+    // Notifications Listener
+    const notificationsRef = database.ref(`instructorNotifications/${userId}`);
+    notificationsRef.on('value', snapshot => {
+        updateNotifications(snapshot.val());
+    });
+
+    // Analytics Listener
+    const analyticsRef = database.ref(`instructorAnalytics/${userId}`);
+    analyticsRef.on('value', snapshot => {
+        updateAnalytics(snapshot.val());
+    });
+
+    // Discussions Listener
+    const discussionsRef = database.ref(`instructorDiscussions/${userId}`);
+    discussionsRef.on('value', snapshot => {
+        updateDiscussionsList(snapshot.val());
+    });
+
+    // Earnings Listener
+    const earningsRef = database.ref(`instructorEarnings/${userId}`);
+    earningsRef.on('value', snapshot => {
+        updateEarningsDisplay(snapshot.val());
+    });
+}
+
+// Initialize Event Listeners
+function initializeEventListeners() {
+    // Navigation
     document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('active');
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const sectionId = link.getAttribute('href').substring(1);
+            switchSection(sectionId);
+        });
     });
 
-    // Add active class to selected section and nav link
-    document.getElementById(`${sectionId}-section`).classList.add('active');
-    document.querySelector(`[href="#${sectionId}"]`).classList.add('active');
+    // Sign Out
+    document.querySelector('.signout-btn').addEventListener('click', handleSignOut);
+
+    // Form Submissions
+    document.getElementById('createCourseForm')?.addEventListener('submit', handleCourseSubmit);
+    document.getElementById('announcementForm')?.addEventListener('submit', handleAnnouncementSubmit);
+    document.getElementById('profileForm')?.addEventListener('submit', handleProfileUpdate);
+    document.getElementById('withdrawalForm')?.addEventListener('submit', handleWithdrawal);
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.action-dropdown')) {
+            document.querySelectorAll('.dropdown-content').forEach(dropdown => {
+                dropdown.classList.remove('active');
+            });
+        }
+    });
+
+    // Close modals when clicking outside
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal(modal.id);
+            }
+        });
+    });
+}
+
+// Dashboard Functions
+async function loadDashboardData(userId) {
+    showLoading();
+    try {
+        const statsRef = database.ref(`instructorStats/${userId}`);
+        const activityRef = database.ref(`instructorActivity/${userId}`).limitToLast(5);
+        const reviewsRef = database.ref(`instructorReviews/${userId}`).limitToLast(3);
+
+        const [stats, activity, reviews] = await Promise.all([
+            statsRef.get(),
+            activityRef.get(),
+            reviewsRef.get()
+        ]);
+
+        updateDashboardStats(stats.val() || {});
+        updateRecentActivity(activity.val() || {});
+        updateRecentReviews(reviews.val() || {});
+
+        // Update student engagement
+        const engagementRef = database.ref(`instructorEngagement/${userId}`);
+        const engagement = await engagementRef.get();
+        updateStudentEngagement(engagement.val() || {});
+
+    } catch (error) {
+        console.error("Error loading dashboard:", error);
+        showToast('Error loading dashboard data', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function updateDashboardStats(stats) {
+    // Update stats cards
+    document.getElementById('totalStudents').textContent = stats.totalStudents || 0;
+    document.getElementById('activeCourses').textContent = stats.activeCourses || 0;
+    document.getElementById('monthlyEarnings').textContent = formatCurrency(stats.monthlyEarnings || 0);
+    document.getElementById('averageRating').textContent = stats.averageRating?.toFixed(1) || '0.0';
+
+    // Update completion and submission rates
+    document.getElementById('completionRate').textContent = `${stats.completionRate || 0}%`;
+    document.getElementById('submissionRate').textContent = `${stats.submissionRate || 0}%`;
+}
+
+function updateRecentActivity(activities) {
+    const activityList = document.getElementById('courseActivityList');
     
-    currentSection = sectionId;
+    if (!activities || Object.keys(activities).length === 0) {
+        activityList.innerHTML = '<div class="empty-state">No recent activity</div>';
+        return;
+    }
+
+    activityList.innerHTML = Object.entries(activities)
+        .sort((a, b) => b[1].timestamp - a[1].timestamp)
+        .map(([id, activity]) => `
+            <div class="activity-item">
+                <div class="activity-info">
+                    <h3>${activity.courseName}</h3>
+                    <p>${activity.description}</p>
+                    <span class="activity-time">${formatTimeAgo(activity.timestamp)}</span>
+                </div>
+                <button class="action-btn" onclick="viewCourseDetails('${activity.courseId}')">
+                    View Details
+                </button>
+            </div>
+        `).join('');
 }
 
-// Modal Functions
-function openModal(modalId) {
-    document.getElementById(modalId).classList.add('active');
+function updateRecentReviews(reviews) {
+    const reviewsList = document.getElementById('reviewsList');
+    
+    if (!reviews || Object.keys(reviews).length === 0) {
+        reviewsList.innerHTML = '<div class="empty-state">No reviews yet</div>';
+        return;
+    }
+
+    reviewsList.innerHTML = Object.entries(reviews)
+        .sort((a, b) => b[1].timestamp - a[1].timestamp)
+        .map(([id, review]) => `
+            <div class="review-item">
+                <div class="review-header">
+                    <span class="review-rating">${'⭐'.repeat(review.rating)}</span>
+                    <span class="review-date">${formatTimeAgo(review.timestamp)}</span>
+                </div>
+                <p class="review-text">"${review.comment}"</p>
+                <span class="review-course">${review.courseName}</span>
+            </div>
+        `).join('');
 }
 
-function closeModal(modalId) {
-    document.getElementById(modalId).classList.remove('active');
+function updateStudentEngagement(engagement) {
+    const engagementStats = document.getElementById('engagementStats');
+    
+    if (!engagement) {
+        return;
+    }
+
+    // Update engagement metrics
+    engagementStats.innerHTML = `
+        <div class="stat-item">
+            <span class="stat-percentage">${engagement.completionRate || 0}%</span>
+            <span class="stat-description">Course Completion Rate</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-percentage">${engagement.submissionRate || 0}%</span>
+            <span class="stat-description">Assignment Submission Rate</span>
+        </div>
+    `;
 }
 
-// Toast Notifications
+// Course Management Functions
+async function loadCoursesData(userId) {
+    showLoading();
+    try {
+        const coursesRef = database.ref(`courses/${userId}`);
+        const snapshot = await coursesRef.get();
+        updateCoursesList(snapshot.val() || {});
+    } catch (error) {
+        console.error("Error loading courses:", error);
+        showToast('Error loading courses', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function updateCoursesList(courses) {
+    const courseList = document.getElementById('courseList');
+    
+    if (!courses || Object.keys(courses).length === 0) {
+        courseList.innerHTML = `
+            <div class="empty-state">
+                <h3>No Courses Yet</h3>
+                <p>Start by creating your first course!</p>
+                <button class="btn-primary" onclick="handleCreateCourse()">Create Course</button>
+            </div>
+        `;
+        return;
+    }
+
+    courseList.innerHTML = Object.entries(courses)
+        .map(([id, course]) => createCourseElement(id, course))
+        .join('');
+}
+
+function createCourseElement(id, course) {
+    return `
+        <div class="course-item" data-status="${course.status}" data-course-id="${id}">
+            <div class="course-thumbnail">
+                <img src="${course.thumbnail || '/api/placeholder/300/200'}" 
+                     alt="${course.title}" class="course-image">
+                <span class="course-status ${course.status}">${course.status}</span>
+            </div>
+            <div class="course-details">
+                <div class="course-info">
+                    <h3>${course.title}</h3>
+                    <p class="course-description">${course.description}</p>
+                    <div class="course-meta">
+                        <span>📚 ${course.lessons || 0} Lessons</span>
+                        <span>⏱️ ${course.duration || 0} Hours</span>
+                        <span>👥 ${course.enrollments || 0} Students</span>
+                    </div>
+                </div>
+                <div class="course-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Rating</span>
+                        <span class="stat-value">⭐ ${course.rating || 0} (${course.reviews || 0})</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Revenue</span>
+                        <span class="stat-value">${formatCurrency(course.revenue || 0)}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="course-actions">
+                <button class="action-btn" onclick="editCourse('${id}')">
+                    Edit Course
+                </button>
+                <button class="action-btn" onclick="viewCourse('${id}')">
+                    View Content
+                </button>
+                <div class="action-dropdown">
+                    <button class="dropdown-btn" onclick="toggleDropdown(this)">⋮</button>
+                    <div class="dropdown-content">
+                        <a href="#" onclick="previewCourse('${id}'); return false;">Preview</a>
+                        <a href="#" onclick="duplicateCourse('${id}'); return false;">Duplicate</a>
+                        <a href="#" onclick="archiveCourse('${id}'); return false;" 
+                           class="text-warning">Archive</a>
+                        <a href="#" onclick="deleteCourse('${id}'); return false;" 
+                           class="text-danger">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+// Course Actions
+async function handleCreateCourse() {
+    // Reset form
+    document.getElementById('createCourseForm').reset();
+    document.getElementById('courseId').value = '';
+    document.getElementById('courseModalTitle').textContent = 'Create New Course';
+    openModal('createCourseModal');
+}
+
+async function handleCourseSubmit(event) {
+    event.preventDefault();
+    if (!currentUser) return;
+
+    showLoading();
+    try {
+        const formData = new FormData(event.target);
+        const courseData = Object.fromEntries(formData);
+        const courseId = courseData.courseId;
+        delete courseData.courseId;
+
+        if (courseId) {
+            await updateCourse(courseId, courseData);
+        } else {
+            await createCourse(courseData);
+        }
+
+        closeModal('createCourseModal');
+        showToast(courseId ? 'Course updated successfully!' : 'Course created successfully!', 'success');
+    } catch (error) {
+        console.error("Course submission error:", error);
+        showToast('Error saving course', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function uploadThumbnail(file) {
+    // Code to handle uploading the thumbnail.
+    // This is just a placeholder. You need to implement the actual file upload logic here.
+    console.log("Uploading thumbnail:", file);
+    return Promise.resolve('https://some-cloud-storage/path/to/image.jpg')
+  }
+  
+  function createCourse(courseData) {
+    // ... other code
+    // Call uploadThumbnail here, for example:
+    const thumbnailPromise = uploadThumbnail(courseData.thumbnail); // Assumes courseData has a thumbnail property.
+  
+    thumbnailPromise.then((thumbnailUrl) => {
+      console.log('Thumbnail url', thumbnailUrl);
+      // Do something with the result of the promise. For example,
+      // save the course information along with the new thumbnail URL.
+    })
+    .catch((error) => {
+      console.log('Could not upload thumbnail', error);
+    })
+    // ... rest of the createCourse code
+  }
+  
+
+async function createCourse(courseData) {
+    const coursesRef = database.ref(`courses/${currentUser.uid}`);
+    const newCourse = coursesRef.push();
+    
+    // Handle thumbnail upload if exists
+    let thumbnailUrl = null;
+    if (courseData.thumbnail instanceof File) {
+        thumbnailUrl = await uploadThumbnail(courseData.thumbnail);
+    }
+
+    await newCourse.set({
+        ...courseData,
+        thumbnail: thumbnailUrl,
+        status: 'draft',
+        enrollments: 0,
+        rating: 0,
+        reviews: 0,
+        revenue: 0,
+        createdAt: firebase.database.ServerValue.TIMESTAMP,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
+    });
+}
+
+async function updateCourse(courseId, courseData) {
+    const courseRef = database.ref(`courses/${currentUser.uid}/${courseId}`);
+    
+    // Handle thumbnail upload if exists
+    if (courseData.thumbnail instanceof File) {
+        courseData.thumbnail = await uploadThumbnail(courseData.thumbnail);
+    }
+
+    await courseRef.update({
+        ...courseData,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
+    });
+}
+
+async function editCourse(courseId) {
+    if (!currentUser) return;
+
+    showLoading();
+    try {
+        const courseRef = database.ref(`courses/${currentUser.uid}/${courseId}`);
+        const snapshot = await courseRef.get();
+        const courseData = snapshot.val();
+
+        if (!courseData) {
+            showToast('Course not found', 'error');
+            return;
+        }
+
+        // Fill form with course data
+        document.getElementById('courseId').value = courseId;
+        document.getElementById('courseTitle').value = courseData.title;
+        document.getElementById('courseDescription').value = courseData.description;
+        document.getElementById('courseCategory').value = courseData.category;
+        document.getElementById('coursePrice').value = courseData.price;
+
+        // Update modal title
+        document.getElementById('courseModalTitle').textContent = 'Edit Course';
+        openModal('createCourseModal');
+    } catch (error) {
+        console.error("Error loading course:", error);
+        showToast('Error loading course data', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function deleteCourse(courseId) {
+    if (!currentUser) return;
+
+    if (!confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+        return;
+    }
+
+    showLoading();
+    try {
+        const courseRef = database.ref(`courses/${currentUser.uid}/${courseId}`);
+        const snapshot = await courseRef.get();
+        const courseData = snapshot.val();
+
+        if (courseData.enrollments > 0) {
+            // Archive instead of delete if there are enrolled students
+            await courseRef.update({
+                status: 'archived',
+                updatedAt: firebase.database.ServerValue.TIMESTAMP
+            });
+            showToast('Course archived successfully', 'success');
+        } else {
+            await courseRef.remove();
+            showToast('Course deleted successfully', 'success');
+        }
+    } catch (error) {
+        console.error("Error deleting course:", error);
+        showToast('Error deleting course', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+// Student Management Functions
+async function loadStudentsData(userId) {
+    showLoading();
+    try {
+        const studentsRef = database.ref(`instructorStudents/${userId}`);
+        const snapshot = await studentsRef.get();
+        updateStudentsList(snapshot.val() || {});
+    } catch (error) {
+        console.error("Error loading students:", error);
+        showToast('Error loading students', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function updateStudentsList(students) {
+    const tbody = document.getElementById('studentsTableBody');
+    
+    if (!students || Object.keys(students).length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="empty-state">
+                    <div class="empty-state-content">
+                        <h3>No Students Yet</h3>
+                        <p>Students will appear here when they enroll in your courses</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = Object.entries(students)
+        .map(([id, student]) => createStudentRow(id, student))
+        .join('');
+}
+
+function createStudentRow(id, student) {
+    return `
+        <tr class="student-row" data-student-id="${id}" data-status="${student.status}">
+            <td>
+                <input type="checkbox" class="select-student" />
+            </td>
+            <td>
+                <div class="student-info">
+                    <img src="${student.avatar || '/api/placeholder/40/40'}" 
+                         alt="${student.name}" class="student-avatar" />
+                    <div>
+                        <div class="student-name">${student.name}</div>
+                        <div class="student-email">${student.email}</div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="course-info">
+                    <div class="course-name">${student.courseName}</div>
+                    <div class="enrollment-date">
+                        Enrolled: ${formatDate(student.enrollmentDate)}
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="progress-info">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${student.progress}%"></div>
+                    </div>
+                    <span>${student.progress}% Complete</span>
+                </div>
+            </td>
+            <td>
+                <div class="activity-info">
+                    <span class="activity-time">${formatTimeAgo(student.lastActive)}</span>
+                    <span class="activity-status ${student.status}">${student.status}</span>
+                </div>
+            </td>
+            <td>
+                <div class="performance-info">
+                    <div class="grade">${student.grade}</div>
+                    <div class="assignment-status">${student.assignmentStatus}</div>
+                </div>
+            </td>
+            <td>
+                <div class="row-actions">
+                    <button class="action-btn" onclick="viewStudentProgress('${id}')">
+                        View Progress
+                    </button>
+                    <div class="action-dropdown">
+                        <button class="dropdown-btn" onclick="toggleDropdown(this)">⋮</button>
+                        <div class="dropdown-content">
+                            <a href="#" onclick="sendMessage('${id}'); return false;">
+                                Send Message
+                            </a>
+                            <a href="#" onclick="viewAssignments('${id}'); return false;">
+                                View Assignments
+                            </a>
+                            <a href="#" onclick="downloadReport('${id}'); return false;">
+                                Download Report
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    `;
+}
+
+// Assignments Functions
+async function loadAssignmentsData(userId) {
+    showLoading();
+    try {
+        const assignmentsRef = database.ref(`assignments/${userId}`);
+        const snapshot = await assignmentsRef.get();
+        updateAssignmentsList(snapshot.val() || {});
+    } catch (error) {
+        console.error("Error loading assignments:", error);
+        showToast('Error loading assignments', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function updateAssignmentsList(assignments) {
+    const assignmentsGrid = document.getElementById('assignmentsGrid');
+    
+    if (!assignments || Object.keys(assignments).length === 0) {
+        assignmentsGrid.innerHTML = `
+            <div class="empty-state">
+                <h3>No Assignments Yet</h3>
+                <p>Create your first assignment</p>
+                <button class="btn-primary" onclick="openModal('createAssignmentModal')">
+                    Create Assignment
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    assignmentsGrid.innerHTML = Object.entries(assignments)
+        .map(([id, assignment]) => createAssignmentCard(id, assignment))
+        .join('');
+}
+
+function createAssignmentCard(id, assignment) {
+    return `
+        <div class="assignment-card" 
+             data-id="${id}" 
+             data-status="${assignment.status}" 
+             data-type="${assignment.type}">
+            <div class="assignment-header">
+                <span class="assignment-type ${assignment.type}">${assignment.type}</span>
+                <div class="assignment-actions">
+                    <button class="icon-btn" onclick="editAssignment('${id}')">✏️</button>
+                    <button class="icon-btn" onclick="toggleDropdown(this)">⋮</button>
+                    <div class="dropdown-content">
+                        <a href="#" onclick="duplicateAssignment('${id}'); return false;">Duplicate</a>
+                        <a href="#" onclick="previewAssignment('${id}'); return false;">Preview</a>
+                        <a href="#" onclick="archiveAssignment('${id}'); return false;" 
+                           class="text-warning">Archive</a>
+                        <a href="#" onclick="deleteAssignment('${id}'); return false;" 
+                           class="text-danger">Delete</a>
+                    </div>
+                </div>
+            </div>
+            <h3 class="assignment-title">${assignment.title}</h3>
+            <div class="assignment-meta">
+                <span class="course-name">${assignment.courseName}</span>
+                <span class="points">${assignment.points} points</span>
+            </div>
+            <div class="assignment-dates">
+                <div class="date-item">
+                    <span class="date-label">Due Date</span>
+                    <span class="date-value">${formatDate(assignment.dueDate)}</span>
+                </div>
+                <div class="date-item">
+                    <span class="date-label">Published</span>
+                    <span class="date-value">${formatDate(assignment.publishDate)}</span>
+                </div>
+            </div>
+            <div class="submission-stats">
+                <div class="stat-item">
+                    <span class="stat-value">${assignment.submittedCount}/${assignment.totalStudents}</span>
+                    <span class="stat-label">Submitted</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">${assignment.gradedCount}</span>
+                    <span class="stat-label">Graded</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">${assignment.averageScore}%</span>
+                    <span class="stat-label">Avg. Score</span>
+                </div>
+            </div>
+            <div class="card-actions">
+                <button class="action-btn" onclick="gradeAssignments('${id}')">
+                    Grade Submissions
+                </button>
+                <button class="action-btn" onclick="viewAssignmentDetails('${id}')">
+                    View Details
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// Analytics Functions
+async function loadAnalyticsData(userId) {
+    showLoading();
+    try {
+        const timeRange = document.getElementById('timeRangeSelect').value || '30';
+        const analyticsRef = database.ref(`instructorAnalytics/${userId}/last${timeRange}Days`);
+        const snapshot = await analyticsRef.get();
+        updateAnalytics(snapshot.val() || {});
+    } catch (error) {
+        console.error("Error loading analytics:", error);
+        showToast('Error loading analytics', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function updateAnalytics(data) {
+    // Update overview stats
+    updateAnalyticsOverview(data.overview || {});
+    
+    // Update revenue chart
+    updateRevenueChart(data.revenue || {});
+    
+    // Update course performance
+    updateCoursePerformance(data.coursePerformance || {});
+    
+    // Update student engagement
+    updateEngagementMetrics(data.engagement || {});
+}
+
+function updateAnalyticsOverview(overview) {
+    const analyticsOverview = document.getElementById('analyticsOverview');
+    
+    analyticsOverview.innerHTML = `
+        <div class="stat-card">
+            <div class="stat-header">
+                <h3>Total Revenue</h3>
+                <span class="trend ${overview.revenueTrend >= 0 ? 'positive' : 'negative'}">
+                    ${overview.revenueTrend >= 0 ? '↑' : '↓'} ${Math.abs(overview.revenueTrend)}%
+                </span>
+            </div>
+            <div class="stat-value">${formatCurrency(overview.totalRevenue || 0)}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <h3>Active Students</h3>
+                <span class="trend ${overview.studentsTrend >= 0 ? 'positive' : 'negative'}">
+                    ${overview.studentsTrend >= 0 ? '↑' : '↓'} ${Math.abs(overview.studentsTrend)}%
+                </span>
+            </div>
+            <div class="stat-value">${overview.activeStudents || 0}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <h3>Course Completion</h3>
+                <span class="trend ${overview.completionTrend >= 0 ? 'positive' : 'negative'}">
+                    ${overview.completionTrend >= 0 ? '↑' : '↓'} ${Math.abs(overview.completionTrend)}%
+                </span>
+            </div>
+            <div class="stat-value">${overview.completionRate || 0}%</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <h3>Average Rating</h3>
+                <span class="trend ${overview.ratingTrend >= 0 ? 'positive' : 'negative'}">
+                    ${overview.ratingTrend >= 0 ? '↑' : '↓'} ${Math.abs(overview.ratingTrend)}%
+                </span>
+            </div>
+            <div class="stat-value">${overview.averageRating?.toFixed(1) || '0.0'}</div>
+        </div>
+    `;
+}
+
+// Discussions Functions
+async function loadDiscussionsData(userId) {
+    showLoading();
+    try {
+        const discussionsRef = database.ref(`instructorDiscussions/${userId}`);
+        const snapshot = await discussionsRef.get();
+        updateDiscussionsList(snapshot.val() || {});
+    } catch (error) {
+        console.error("Error loading discussions:", error);
+        showToast('Error loading discussions', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function updateDiscussionsList(discussions) {
+    // Update pinned topics
+    const pinnedTopicsList = document.getElementById('pinnedTopicsList');
+    const pinnedTopics = Object.entries(discussions)
+        .filter(([_, discussion]) => discussion.pinned);
+    
+    if (pinnedTopics.length === 0) {
+        pinnedTopicsList.innerHTML = '<div class="empty-state">No pinned topics</div>';
+    } else {
+        pinnedTopicsList.innerHTML = pinnedTopics
+            .map(([id, discussion]) => createDiscussionCard(id, discussion, true))
+            .join('');
+    }
+
+    // Update recent discussions
+    const recentDiscussionsList = document.getElementById('recentDiscussionsList');
+    const recentDiscussions = Object.entries(discussions)
+        .filter(([_, discussion]) => !discussion.pinned)
+        .sort((a, b) => b[1].timestamp - a[1].timestamp);
+    
+    if (recentDiscussions.length === 0) {
+        recentDiscussionsList.innerHTML = '<div class="empty-state">No recent discussions</div>';
+    } else {
+        recentDiscussionsList.innerHTML = recentDiscussions
+            .map(([id, discussion]) => createDiscussionCard(id, discussion, false))
+            .join('');
+    }
+}
+
+// Earnings Functions
+async function loadEarningsData(userId) {
+    showLoading();
+    try {
+        const earningsRef = database.ref(`instructorEarnings/${userId}`);
+        const snapshot = await earningsRef.get();
+        updateEarningsDisplay(snapshot.val() || {});
+    } catch (error) {
+        console.error("Error loading earnings:", error);
+        showToast('Error loading earnings data', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function updateEarningsDisplay(earnings) {
+    // Update total earnings
+    document.getElementById('totalEarnings').textContent = formatCurrency(earnings.total || 0);
+
+    // Update earnings trend
+    const trendElement = document.getElementById('earningsTrend');
+    const trend = earnings.trend || 0;
+    trendElement.innerHTML = `
+        <span class="trend-icon">${trend >= 0 ? '↑' : '↓'}</span>
+        <span class="trend-value">${Math.abs(trend)}%</span>
+        <span class="trend-label">vs last period</span>
+    `;
+    trendElement.className = `earnings-trend ${trend >= 0 ? 'positive' : 'negative'}`;
+
+    // Update pending payout
+    document.getElementById('pendingPayout').textContent = formatCurrency(earnings.pending || 0);
+    document.getElementById('payoutDate').textContent = 
+        `Next payout: ${formatDate(earnings.nextPayoutDate)}`;
+
+    // Update course revenue list
+    updateCourseRevenueList(earnings.courseRevenue || {});
+
+    // Update earnings chart
+    updateEarningsChart(earnings.history || {});
+}
+
+function updateCourseRevenueList(courseRevenue) {
+    const revenueList = document.getElementById('courseRevenueList');
+    
+    if (!courseRevenue || Object.keys(courseRevenue).length === 0) {
+        revenueList.innerHTML = '<div class="empty-state">No revenue data available</div>';
+        return;
+    }
+
+    revenueList.innerHTML = Object.entries(courseRevenue)
+        .sort((a, b) => b[1].revenue - a[1].revenue)
+        .map(([id, data]) => `
+            <div class="course-revenue-item">
+                <div class="course-info">
+                    <div class="course-name">${data.title}</div>
+                    <div class="course-stats">
+                        <span>${data.students} Students</span>
+                        <span>•</span>
+                        <span>${data.rating} ★</span>
+                    </div>
+                </div>
+                <div class="revenue-info">
+                    <div class="revenue-amount">${formatCurrency(data.revenue)}</div>
+                    <div class="revenue-trend ${data.trend >= 0 ? 'positive' : 'negative'}">
+                        ${data.trend >= 0 ? '+' : ''}${data.trend}%
+                    </div>
+                </div>
+            </div>
+        `).join('');
+}
+
+function updateEarningsChart(history) {
+    const ctx = document.getElementById('earningsChart').getContext('2d');
+    const dates = Object.keys(history).sort();
+    const revenues = dates.map(date => history[date]);
+
+    if (window.earningsChart) {
+        window.earningsChart.destroy();
+    }
+
+    window.earningsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dates.map(date => formatDate(date)),
+            datasets: [{
+                label: 'Revenue',
+                data: revenues,
+                borderColor: '#4993ee',
+                tension: 0.4,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: value => formatCurrency(value)
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Utility Functions
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(amount || 0);
+}
+
+function formatDate(timestamp) {
+    return new Date(timestamp).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+}
+
+function formatTimeAgo(timestamp) {
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+    
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+    
+    return formatDate(timestamp);
+}
+
+// UI Helper Functions
+function showLoading() {
+    document.getElementById('loadingOverlay').classList.add('active');
+}
+
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('active');
+}
+
 function showToast(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
@@ -42,112 +1035,9 @@ function showToast(message, type = 'success') {
     const container = document.getElementById('toastContainer');
     container.appendChild(toast);
     
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
+    setTimeout(() => toast.remove(), 3000);
 }
 
-// Dropdown Functions
-function toggleDropdown(button) {
-    const dropdown = button.nextElementSibling;
-    dropdown.classList.toggle('active');
-
-    // Close other dropdowns
-    document.querySelectorAll('.dropdown-content').forEach(content => {
-        if (content !== dropdown) {
-            content.classList.remove('active');
-        }
-    });
-}
-
-// Form Handling
-function handleFormSubmission(formId, successCallback, errorCallback) {
-    const form = document.getElementById(formId);
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(form);
-        
-        try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            successCallback(Object.fromEntries(formData.entries()));
-            form.reset();
-        } catch (error) {
-            errorCallback(error);
-        }
-    });
-}
-
-// File Upload
-function handleFileUpload(inputId, previewId, callback) {
-    const input = document.getElementById(inputId);
-    const preview = document.getElementById(previewId);
-    
-    input.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                preview.src = e.target.result;
-                if (callback) callback(file);
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-}
-
-// Data Export
-function exportData(data, filename) {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize navigation
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const sectionId = link.getAttribute('href').substring(1);
-            switchSection(sectionId);
-        });
-    });
-
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.action-dropdown')) {
-            document.querySelectorAll('.dropdown-content').forEach(dropdown => {
-                dropdown.classList.remove('active');
-            });
-        }
-    });
-
-    // Close modals when clicking outside
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-            }
-        });
-    });
-
-    // Initialize toast container
-    if (!document.getElementById('toastContainer')) {
-        const toastContainer = document.createElement('div');
-        toastContainer.id = 'toastContainer';
-        toastContainer.className = 'toast-container';
-        document.body.appendChild(toastContainer);
-    }
-});
-
-// Modal Functions
 function openModal(modalId) {
     document.getElementById(modalId).classList.add('active');
 }
@@ -156,176 +1046,6 @@ function closeModal(modalId) {
     document.getElementById(modalId).classList.remove('active');
 }
 
-// Toast Function
-function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `
-        <span class="toast-icon">${type === 'success' ? '✓' : '✕'}</span>
-        <span class="toast-message">${message}</span>
-    `;
-
-    const container = document.getElementById('toastContainer');
-    container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
-}
-
-// Dashboard Button Handlers
-function handleCreateCourse() {
-    openModal('createCourseModal');
-}
-
-function submitCourseForm(event) {
-    event.preventDefault();
-    // Handle form submission
-    showToast('Course created successfully!');
-    closeModal('createCourseModal');
-}
-
-function viewCourseDetails(courseId) {
-    // Navigate to course details
-    showToast('Navigating to course details...');
-}
-
-function viewEngagementDetails() {
-    // Navigate to analytics section
-    showToast('Viewing engagement details...');
-}
-
-function viewAllReviews() {
-    // Show all reviews
-    showToast('Loading all reviews...');
-}
-
-function addNewEvent() {
-    openModal('addEventModal');
-}
-
-function submitEventForm(event) {
-    event.preventDefault();
-    // Handle event submission
-    showToast('Event added successfully!');
-    closeModal('addEventModal');
-}
-
-function viewEventDetails(eventId) {
-    // Show event details
-    showToast('Viewing event details...');
-}
-
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    // Close modals when clicking outside
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-            }
-        });
-    });
-});
-
-// Filter Functions
-function filterCourses(status) {
-    // Update active filter button
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    event.target.classList.add('active');
-
-    // Filter courses
-    document.querySelectorAll('.course-item').forEach(course => {
-        if (status === 'all' || course.dataset.status === status) {
-            course.style.display = 'flex';
-        } else {
-            course.style.display = 'none';
-        }
-    });
-}
-
-// Search Function
-function searchCourses(query) {
-    const courses = document.querySelectorAll('.course-item');
-    courses.forEach(course => {
-        const title = course.querySelector('h3').textContent.toLowerCase();
-        const description = course.querySelector('.course-description').textContent.toLowerCase();
-        
-        if (title.includes(query.toLowerCase()) || description.includes(query.toLowerCase())) {
-            course.style.display = 'flex';
-        } else {
-            course.style.display = 'none';
-        }
-    });
-}
-
-// Course Actions
-function editCourse(courseId) {
-    currentCourseId = courseId;
-    document.getElementById('courseModalTitle').textContent = 'Edit Course';
-    document.getElementById('courseId').value = courseId;
-    
-    // Simulate getting course data
-    const courseData = {
-        title: 'Web Development Bootcamp',
-        description: 'Complete web development course...',
-        category: 'web-development',
-        level: 'intermediate',
-        price: 99.99,
-        duration: 42
-    };
-
-    // Fill form with course data
-    document.getElementById('courseTitle').value = courseData.title;
-    document.getElementById('courseDescription').value = courseData.description;
-    document.getElementById('courseCategory').value = courseData.category;
-    document.getElementById('courseLevel').value = courseData.level;
-    document.getElementById('coursePrice').value = courseData.price;
-    document.getElementById('courseDuration').value = courseData.duration;
-
-    openModal('createCourseModal');
-}
-
-function viewCourse(courseId) {
-    showToast('Navigating to course content...');
-    // Navigate to course content page
-}
-
-function previewCourse(courseId) {
-    showToast('Opening course preview...');
-    // Open course preview
-}
-
-function duplicateCourse(courseId) {
-    showToast('Duplicating course...', 'success');
-    // Duplicate course logic
-}
-
-function archiveCourse(courseId) {
-    showToast('Course archived successfully', 'success');
-    // Archive course logic
-}
-
-function deleteCourse(courseId) {
-    currentCourseId = courseId;
-    openModal('deleteConfirmModal');
-}
-
-function confirmDelete() {
-    showToast('Course deleted successfully', 'success');
-    closeModal('deleteConfirmModal');
-    // Delete course logic
-    document.querySelector(`[data-course-id="${currentCourseId}"]`)?.remove();
-}
-
-function publishCourse(courseId) {
-    showToast('Course published successfully', 'success');
-    // Publish course logic
-}
-
-// Dropdown Toggle
 function toggleDropdown(button) {
     const dropdown = button.nextElementSibling;
     dropdown.classList.toggle('active');
@@ -338,783 +1058,245 @@ function toggleDropdown(button) {
     });
 }
 
-// Form Submit Handler
-function handleCourseSubmit(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    
-    // Simulate API call
-    setTimeout(() => {
-        showToast('Course saved successfully!', 'success');
-        closeModal('createCourseModal');
-        event.target.reset();
-    }, 1000);
-}
-
-// Close dropdowns when clicking outside
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('.action-dropdown')) {
-        document.querySelectorAll('.dropdown-content').forEach(dropdown => {
-            dropdown.classList.remove('active');
+// Handle sign out
+function handleSignOut() {
+    auth.signOut()
+        .then(() => {
+            window.location.href = 'signin.html';
+        })
+        .catch((error) => {
+            console.error("Sign out error:", error);
+            showToast('Error signing out', 'error');
         });
-    }
+}
+
+// Error handling
+window.addEventListener('error', (event) => {
+    console.error('Global error:', event.error);
+    showToast('An error occurred. Please refresh the page.', 'error');
 });
 
-// Filter Functions
-function filterStudentsByCourse(courseId) {
-    const rows = document.querySelectorAll('.student-row');
-    rows.forEach(row => {
-        if (courseId === 'all' || row.dataset.course === courseId) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
+// Connection status
+window.addEventListener('online', () => {
+    showToast('Connection restored', 'success');
+    location.reload();
+});
+
+window.addEventListener('offline', () => {
+    showToast('Connection lost. Some features may be unavailable.', 'error');
+});
+
+
+// Authentication Check
+function checkAuth() {
+    showLoading();
+    auth.onAuthStateChanged(async (user) => {
+        try {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Check if user is an instructor
+            const userRef = database.ref(`users/${user.uid}`);
+            const snapshot = await userRef.get();
+            const userData = snapshot.val();
+
+            if (!userData || userData.role !== 'instructor') {
+                // Not an instructor
+                await auth.signOut();
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // User is authenticated and is an instructor
+            currentUser = user;
+            await updateUserDisplay(userData);
+            await initializeInstructorPortal(userData);
+        } catch (error) {
+            console.error("Auth check error:", error);
+            showToast('Error verifying credentials', 'error');
+        } finally {
+            hideLoading();
         }
     });
 }
 
-function filterStudentsByStatus(status) {
-    const rows = document.querySelectorAll('.student-row');
-    rows.forEach(row => {
-        if (status === 'all' || row.dataset.status === status) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
+// Initialize Instructor Portal
+async function initializeInstructorPortal(userData) {
+    try {
+        // Update profile UI
+        await updateUserDisplay(userData);
+        
+        // Set up real-time listeners
+        setupDataListeners(userData.uid);
+        
+        // Load initial dashboard data
+        await loadDashboardData(userData.uid);
+    } catch (error) {
+        console.error("Error initializing portal:", error);
+        showToast('Error loading dashboard data', 'error');
+    }
 }
 
-// Search Function
-function searchStudents(query) {
-    const rows = document.querySelectorAll('.student-row');
-    rows.forEach(row => {
-        const name = row.querySelector('.student-name').textContent.toLowerCase();
-        const email = row.querySelector('.student-email').textContent.toLowerCase();
-        if (name.includes(query.toLowerCase()) || email.includes(query.toLowerCase())) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
-
-// Checkbox Functions
-function toggleSelectAll(checkbox) {
-    const studentCheckboxes = document.querySelectorAll('.select-student');
-    studentCheckboxes.forEach(box => {
-        box.checked = checkbox.checked;
-    });
-}
-
-// Student Actions
-function viewStudentProgress(studentId) {
-    // Simulate loading student data
-    const studentData = {
-        name: 'John Smith',
-        email: 'john@example.com',
-        progress: 75,
-        assignments: '15/20',
-        grade: '92%'
+// Update User Display
+async function updateUserDisplay(userData) {
+    if (!userData) return;
+    
+    // Update profile elements if they exist
+    const profileElements = {
+        'userName': userData.name,
+        'userEmail': userData.email,
+        'welcomeMessage': `Welcome back, ${userData.name}! 👋`
     };
 
-    // Update modal with student data
-    document.getElementById('modalStudentName').textContent = studentData.name;
-    document.getElementById('modalStudentEmail').textContent = studentData.email;
-    
-    openModal('studentProgressModal');
-}
+    for (const [id, value] of Object.entries(profileElements)) {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+    }
 
-function sendMessage(studentId) {
-    document.getElementById('messageRecipient').value = 'John Smith <john@example.com>';
-    openModal('messageModal');
-}
-
-function viewAssignments(studentId) {
-    showToast('Loading assignments...');
-    // Implementation for viewing assignments
-}
-
-function downloadReport(studentId) {
-    showToast('Generating report...');
-    setTimeout(() => {
-        showToast('Report downloaded successfully', 'success');
-    }, 1500);
-}
-
-function manageAccess(studentId) {
-    openModal('accessModal');
-}
-
-// Form Submissions
-function sendMessageSubmit(event) {
-    event.preventDefault();
-    showToast('Message sent successfully', 'success');
-    closeModal('messageModal');
-}
-
-function updateAccess(event) {
-    event.preventDefault();
-    showToast('Access updated successfully', 'success');
-    closeModal('accessModal');
-}
-
-// Export Function
-function exportStudentData() {
-    showToast('Preparing export...', 'info');
-    setTimeout(() => {
-        showToast('Data exported successfully', 'success');
-    }, 1500);
-}
-
-// Tab Functions
-function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    event.target.classList.add('active');
-    
-    // Implementation for loading tab content
-    showToast(`Loading ${tab} data...`);
-}
-
-// Initialize event listeners
-document.addEventListener('DOMContentLoaded', () => {
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.action-dropdown')) {
-            document.querySelectorAll('.dropdown-content').forEach(dropdown => {
-                dropdown.classList.remove('active');
-            });
-        }
-    });
-});
-
-
-  // Filter Functions
-  function filterAssignmentsByCourse(courseId) {
-    const cards = document.querySelectorAll('.assignment-card');
-    cards.forEach(card => {
-        if (courseId === 'all' || card.dataset.course === courseId) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-}
-
-function filterAssignmentsByStatus(status) {
-    const cards = document.querySelectorAll('.assignment-card');
-    cards.forEach(card => {
-        if (status === 'all' || card.dataset.status === status) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-}
-
-function filterAssignmentsByType(type) {
-    const cards = document.querySelectorAll('.assignment-card');
-    cards.forEach(card => {
-        if (type === 'all' || card.dataset.type === type) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-}
-
-// Search Function
-function searchAssignments(query) {
-    const cards = document.querySelectorAll('.assignment-card');
-    cards.forEach(card => {
-        const title = card.querySelector('.assignment-title').textContent.toLowerCase();
-        if (title.includes(query.toLowerCase())) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-}
-
-// Assignment Actions
-function editAssignment(assignmentId) {
-    document.getElementById('assignmentModalTitle').textContent = 'Edit Assignment';
-    document.getElementById('assignmentId').value = assignmentId;
-    
-    // Simulate getting assignment data
-    const assignmentData = {
-        title: 'Final Project: Full-Stack Application',
-        course: 'web-dev',
-        type: 'project',
-        points: 100,
-        description: 'Create a full-stack application...'
-    };
-
-    // Fill form with assignment data
-    document.getElementById('assignmentTitle').value = assignmentData.title;
-    document.getElementById('assignmentCourse').value = assignmentData.course;
-    document.getElementById('assignmentType').value = assignmentData.type;
-    document.getElementById('assignmentPoints').value = assignmentData.points;
-    document.getElementById('assignmentDescription').value = assignmentData.description;
-
-    openModal('createAssignmentModal');
-}
-
-function duplicateAssignment(assignmentId) {
-    showToast('Duplicating assignment...', 'success');
-}
-
-function previewAssignment(assignmentId) {
-    showToast('Opening assignment preview...');
-}
-
-function archiveAssignment(assignmentId) {
-    showToast('Assignment archived successfully', 'success');
-}
-
-function deleteAssignment(assignmentId) {
-    if (confirm('Are you sure you want to delete this assignment?')) {
-        showToast('Assignment deleted successfully', 'success');
+    // Update profile image if exists
+    if (userData.avatar) {
+        const profileImage = document.getElementById('userProfileImage');
+        if (profileImage) profileImage.src = userData.avatar;
     }
 }
 
-function gradeAssignments(assignmentId) {
-    // Load submissions and open grading modal
-    openModal('gradeSubmissionsModal');
-    loadSubmissions(assignmentId);
-}
-
-function loadSubmissions(assignmentId) {
-    // Simulate loading submissions
-    const submissionsList = document.querySelector('.submissions-list');
-    submissionsList.innerHTML = '<p>Loading submissions...</p>';
-    
-    // Add submission loading logic here
-}
-
-// Form Submit Handler
-function handleAssignmentSubmit(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    
-    // Simulate API call
-    setTimeout(() => {
-        showToast('Assignment saved successfully!', 'success');
-        closeModal('createAssignmentModal');
-        event.target.reset();
-    }, 1000);
-}
-
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.action-dropdown')) {
-            document.querySelectorAll('.dropdown-content').forEach(dropdown => {
-                dropdown.classList.remove('active');
-            });
-        }
+// Section Navigation Function
+function switchSection(sectionId) {
+    // Remove active class from all sections and nav links
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.remove('active');
     });
-});
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
 
-// Analytics Functions
-function updateTimeRange(days) {
-    showToast('Updating time range...');
-    // Update all charts and stats based on new time range
-    updateAllCharts(days);
-}
-
-function updateAllCharts(days) {
-    // Update each chart with new data
-    updateRevenueChart(days);
-    updateEngagementChart(days);
-    updateGeoMap(days);
-}
-
-function updateChartView(view) {
-    const buttons = document.querySelectorAll('.chart-btn');
-    buttons.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+    // Add active class to selected section and nav link
+    const selectedSection = document.getElementById(`${sectionId}-section`);
+    const selectedLink = document.querySelector(`[href="#${sectionId}"]`);
     
-    showToast(`Updating chart view to ${view}...`);
-    // Update chart based on selected view
+    if (selectedSection) selectedSection.classList.add('active');
+    if (selectedLink) selectedLink.classList.add('active');
+    
+    currentSection = sectionId;
+
+    // Load section-specific data
+    loadSectionData(sectionId);
 }
 
-function updateEngagementView(period) {
-    showToast(`Updating engagement view to ${period}...`);
-    // Update engagement metrics based on selected period
-}
-
-function updateMapView(metric) {
-    showToast(`Updating map view to show ${metric}...`);
-    // Update geographic map based on selected metric
-}
-
-function exportAnalytics() {
-    showToast('Preparing analytics report...');
-    setTimeout(() => {
-        showToast('Analytics report downloaded successfully', 'success');
-    }, 1500);
-}
-
-// Chart Initialization
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize all charts
-    initializeCharts();
-});
-
-function initializeCharts() {
-    // Initialize Revenue Chart
-    const revenueChart = document.getElementById('revenueChart');
-    if (revenueChart) {
-        // Initialize chart library and create chart
-    }
-
-    // Initialize Engagement Chart
-    const engagementChart = document.getElementById('engagementChart');
-    if (engagementChart) {
-        // Initialize chart library and create chart
-    }
-
-    // Initialize Geographic Map
-    const geoMap = document.getElementById('geoMap');
-    if (geoMap) {
-        // Initialize map library and create map
-    }
-}
-
-// Discussion Functions
-function filterDiscussions(type) {
-    const buttons = document.querySelectorAll('.filter-btn');
-    buttons.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-
-    const cards = document.querySelectorAll('.discussion-card');
-    cards.forEach(card => {
-        if (type === 'all' || card.dataset.type === type) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
+// Settings Tab Function
+function switchSettingsTab(tabId) {
+    // Remove active class from all panels and links
+    document.querySelectorAll('.settings-panel').forEach(panel => {
+        panel.classList.remove('active');
     });
-}
-
-function searchDiscussions(query) {
-    const cards = document.querySelectorAll('.discussion-card');
-    cards.forEach(card => {
-        const title = card.querySelector('.topic-title').textContent.toLowerCase();
-        const content = card.querySelector('.topic-preview').textContent.toLowerCase();
-        if (title.includes(query.toLowerCase()) || content.includes(query.toLowerCase())) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
+    document.querySelectorAll('.settings-link').forEach(link => {
+        link.classList.remove('active');
     });
+
+    // Add active class to selected panel and link
+    const selectedPanel = document.getElementById(`${tabId}-settings`);
+    const selectedLink = document.querySelector(`[href="#${tabId}"]`);
+    
+    if (selectedPanel) selectedPanel.classList.add('active');
+    if (selectedLink) selectedLink.classList.add('active');
 }
 
-function sortDiscussions(criteria) {
-    showToast(`Sorting discussions by ${criteria}...`);
-    // Implement sorting logic
-}
-
+// Announcement Submit Handler
 function handleAnnouncementSubmit(event) {
     event.preventDefault();
-    const formData = new FormData(event.target);
-    
-    // Simulate API call
-    setTimeout(() => {
+    if (!currentUser) return;
+
+    showLoading();
+    try {
+        const formData = new FormData(event.target);
+        const data = Object.fromEntries(formData);
+        
+        // Create announcement
+        const announcementRef = database.ref(`instructorAnnouncements/${currentUser.uid}`).push();
+        
+        announcementRef.set({
+            ...data,
+            createdAt: firebase.database.ServerValue.TIMESTAMP,
+            author: {
+                id: currentUser.uid,
+                name: currentUser.displayName || 'Instructor'
+            }
+        });
+
         showToast('Announcement posted successfully!', 'success');
         closeModal('createAnnouncementModal');
         event.target.reset();
-    }, 1000);
-}
-
-function quickReply(topicId) {
-    currentTopicId = topicId;
-    openModal('quickReplyModal');
-}
-
-function handleReplySubmit(event) {
-    event.preventDefault();
-    showToast('Posting reply...');
-    
-    setTimeout(() => {
-        showToast('Reply posted successfully!', 'success');
-        closeModal('quickReplyModal');
-        event.target.reset();
-    }, 1000);
-}
-
-function viewThread(topicId) {
-    openModal('threadViewModal');
-    document.getElementById('threadTitle').textContent = 'Loading...';
-    
-    // Simulate loading thread content
-    setTimeout(() => {
-        const threadContent = document.querySelector('.thread-content');
-        threadContent.innerHTML = `
-            <div class="thread-loading">Loading thread content...</div>
-        `;
-        // Load actual thread content here
-    }, 500);
-}
-
-function pinTopic(topicId) {
-    showToast('Pinning topic...', 'info');
-    setTimeout(() => {
-        showToast('Topic pinned successfully!', 'success');
-    }, 1000);
-}
-
-function unpinTopic(topicId) {
-    showToast('Unpinning topic...', 'info');
-    setTimeout(() => {
-        showToast('Topic unpinned successfully!', 'success');
-    }, 1000);
-}
-
-function markAsAnswer(topicId) {
-    showToast('Marking as answer...', 'info');
-    setTimeout(() => {
-        showToast('Marked as answer successfully!', 'success');
-    }, 1000);
-}
-
-function lockTopic(topicId) {
-    if (confirm('Are you sure you want to lock this topic?')) {
-        showToast('Topic locked successfully', 'success');
+    } catch (error) {
+        console.error('Error posting announcement:', error);
+        showToast('Error posting announcement', 'error');
+    } finally {
+        hideLoading();
     }
 }
 
-function deleteTopic(topicId) {
-    if (confirm('Are you sure you want to delete this topic?')) {
-        showToast('Topic deleted successfully', 'success');
-    }
-}
-
-function viewForum(forumId) {
-    showToast('Loading forum...', 'info');
-    // Implement forum view navigation
-}
-
-// Initialize
+// Initialize Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize rich text editor if available
-    if (typeof tinymce !== 'undefined') {
-        tinymce.init({
-            selector: '.rich-editor',
-            // Rich text editor configuration
+    // Navigation event listeners
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const sectionId = link.getAttribute('href').substring(1);
+            switchSection(sectionId);
         });
-    }
-});
+    });
 
+    // Settings navigation event listeners
+    document.querySelectorAll('.settings-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const tabId = link.getAttribute('href').substring(1);
+            switchSettingsTab(tabId);
+        });
+    });
 
-// Earnings Functions
-function updateEarningsRange(days) {
-    showToast('Updating earnings data...');
-    // Update earnings data based on selected time range
-    setTimeout(() => {
-        showToast('Earnings data updated', 'success');
-    }, 1000);
-}
-
-function updateEarningsPeriod(period) {
-    showToast('Updating earnings period...');
-    // Update earnings based on selected period
-    setTimeout(() => {
-        showToast('Earnings period updated', 'success');
-    }, 1000);
-}
-
-function initiateWithdrawal() {
-    openModal('withdrawalModal');
-}
-
-function handleWithdrawal(event) {
-    event.preventDefault();
-    showToast('Processing withdrawal...');
-    
-    setTimeout(() => {
-        showToast('Withdrawal initiated successfully', 'success');
-        closeModal('withdrawalModal');
-    }, 1500);
-}
-
-function exportEarningsReport() {
-    showToast('Generating earnings report...');
-    setTimeout(() => {
-        showToast('Report downloaded successfully', 'success');
-    }, 1500);
-}
-
-function updateRevenueView(view) {
-    const buttons = document.querySelectorAll('.chart-btn');
-    buttons.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-    
-    showToast(`Updating revenue view to ${view}...`);
-    // Update revenue chart based on selected view
-}
-
-function viewAllTransactions() {
-    showToast('Loading all transactions...');
-    // Implement view all transactions logic
-}
-
-function filterPayouts(status) {
-    showToast('Filtering payouts...');
-    // Implement payout filtering logic
-}
-
-// Initialize Charts
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize Revenue Chart
-    const ctx = document.getElementById('revenueChart')?.getContext('2d');
-    if (ctx) {
-        // Initialize chart with data
-    }
-});
-
-// Settings Navigation
-function switchSettingsTab(tab) {
-    // Remove active class from all links and panels
-    document.querySelectorAll('.settings-link').forEach(link => link.classList.remove('active'));
-    document.querySelectorAll('.settings-panel').forEach(panel => panel.classList.remove('active'));
-    
-    // Add active class to clicked link
-    document.querySelector(`[href="#${tab}"]`).classList.add('active');
-    
-    // Show corresponding panel
-    document.getElementById(`${tab}-settings`).classList.add('active');
-}
-
-// Profile Functions
-function handleAvatarUpload(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            document.getElementById('profileImage').src = e.target.result;
-            showToast('Profile picture updated successfully', 'success');
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-function handleProfileUpdate(event) {
-    event.preventDefault();
-    
-    showToast('Saving changes...');
-    setTimeout(() => {
-        showToast('Profile updated successfully', 'success');
-    }, 1000);
-}
-
-// Security Functions
-function handlePasswordUpdate(event) {
-    event.preventDefault();
-    
-    // Add password validation logic here
-    showToast('Updating password...');
-    setTimeout(() => {
-        showToast('Password updated successfully', 'success');
-        event.target.reset();
-    }, 1000);
-}
-
-function toggle2FA(enabled) {
-    if (enabled) {
-        showToast('Setting up 2FA...', 'info');
-        // Show 2FA setup modal/process
-    } else {
-        showToast('2FA disabled', 'success');
-    }
-}
-
-function endSession(sessionId) {
-    if (confirm('Are you sure you want to end this session?')) {
-        showToast('Ending session...', 'info');
-        setTimeout(() => {
-            showToast('Session ended successfully', 'success');
-            // Remove session from list
-        }, 1000);
-    }
-}
-
-// Notification Functions
-function updateNotificationSetting(setting, enabled) {
-    showToast('Updating notification settings...');
-    setTimeout(() => {
-        showToast('Notification settings updated', 'success');
-    }, 500);
-}
-
-function updateEmailFrequency(frequency) {
-    showToast('Updating email frequency...');
-    setTimeout(() => {
-        showToast('Email frequency updated', 'success');
-    }, 500);
-}
-
-// Payment Method Functions
-function editPaymentMethod(method) {
-    document.getElementById('paymentMethodType').value = 
-        method === 'paypal' ? 'PayPal' : 'Bank Transfer';
-    
-    document.getElementById('paypalFields').style.display = 
-        method === 'paypal' ? 'block' : 'none';
-        document.getElementById('bankFields').style.display = 
-        method === 'bank' ? 'block' : 'none';
-    
-    openModal('paymentMethodModal');
-}
-
-function handlePaymentMethodUpdate(event) {
-    event.preventDefault();
-    showToast('Updating payment method...');
-    
-    setTimeout(() => {
-        showToast('Payment method updated successfully', 'success');
-        closeModal('paymentMethodModal');
-    }, 1000);
-}
-
-function updatePayoutSchedule(schedule) {
-    showToast('Updating payout schedule...');
-    setTimeout(() => {
-        showToast('Payout schedule updated', 'success');
-    }, 500);
-}
-
-// Utility Functions
-function resetForm(formId) {
-    document.getElementById(formId).reset();
-    showToast('Changes discarded', 'info');
-}
-
-// Revenue Chart
-const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-const revenueChart = new Chart(revenueCtx, {
-    type: 'line',
-    data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [{
-            label: 'Revenue',
-            data: [12000, 19000, 15000, 25000, 22000, 30000],
-            borderColor: '#4993ee',
-            tension: 0.4
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            }
+    // Check authentication status
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
         }
-    }
-});
 
-// Student Engagement Chart
-const engagementCtx = document.getElementById('engagementChart').getContext('2d');
-const engagementChart = new Chart(engagementCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Active', 'Inactive', 'Completed'],
-        datasets: [{
-            data: [65, 20, 15],
-            backgroundColor: ['#4993ee', '#64748b', '#22c55e']
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
-    }
-});
+        try {
+            // Check if user is an instructor
+            const userRef = database.ref(`users/${user.uid}`);
+            const snapshot = await userRef.get();
+            const userData = snapshot.val();
 
-// Geographic Distribution Map
-const map = L.map('geoMap').setView([0, 0], 2);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
-}).addTo(map);
+            if (!userData || userData.role !== 'instructor') {
+                await auth.signOut();
+                window.location.href = 'login.html';
+                return;
+            }
 
-// Add some sample data points
-const sampleData = [
-    { lat: 40.7128, lng: -74.0060, students: 150 },
-    { lat: 51.5074, lng: -0.1278, students: 89 },
-    { lat: 28.6139, lng: 77.2090, students: 120 }
-];
-
-sampleData.forEach(point => {
-    L.circleMarker([point.lat, point.lng], {
-        radius: Math.sqrt(point.students) * 0.5,
-        fillColor: '#4993ee',
-        color: '#fff',
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-    })
-    .bindPopup(`${point.students} students`)
-    .addTo(map);
-});
-
-// Progress Ring Animation
-function setProgressRing(percent) {
-    const circle = document.querySelector('.progress-ring .progress');
-    const radius = circle.r.baseVal.value;
-    const circumference = 2 * Math.PI * radius;
-    
-    circle.style.strokeDasharray = circumference;
-    circle.style.strokeDashoffset = circumference - (percent / 100) * circumference;
-}
-
-// Initialize progress rings
-document.querySelectorAll('.progress-ring').forEach(ring => {
-    const percent = ring.dataset.value || 0;
-    setProgressRing(percent);
-});
-
-// Add these functions to your instructor.js file
-
-function toggleNotifications() {
-    const dropdown = document.querySelector('.notification-dropdown');
-    dropdown.classList.toggle('show');
-
-    // Close when clicking outside
-    document.addEventListener('click', function closeNotif(e) {
-        if (!e.target.closest('.notification-wrapper')) {
-            dropdown.classList.remove('show');
-            document.removeEventListener('click', closeNotif);
+            currentUser = user;
+            initializeInstructorPortal(userData);
+        } catch (error) {
+            console.error('Auth check error:', error);
+            showToast('Error verifying credentials', 'error');
+            window.location.href = 'login.html';
         }
     });
-}
-
-function markAsRead(button) {
-    const notificationItem = button.closest('.notification-item');
-    notificationItem.classList.remove('unread');
-    updateNotificationCount();
-}
-
-function markAllAsRead() {
-    document.querySelectorAll('.notification-item.unread')
-        .forEach(item => item.classList.remove('unread'));
-    updateNotificationCount();
-}
-
-function updateNotificationCount() {
-    const unreadCount = document.querySelectorAll('.notification-item.unread').length;
-    const badge = document.querySelector('.notification-badge');
-    
-    if (unreadCount === 0) {
-        badge.style.display = 'none';
-    } else {
-        badge.style.display = 'block';
-        badge.textContent = unreadCount;
-    }
-}
-
-// Initialize notification count
-document.addEventListener('DOMContentLoaded', () => {
-    updateNotificationCount();
 });
+
+
+function handleAvatarUpload(event) {
+    // Get the file from the input.
+    const file = event.target.files[0];
+  
+    // Basic error handling - ensure file is selected.
+    if (!file) {
+      console.error("No file selected.");
+      return;
+    }
+  
+    // Add your file handling logic here.
+    console.log("File selected:", file);
+    // Example: You could now upload the file to a server or display a preview.
+  }
