@@ -1093,7 +1093,7 @@ function checkAuth() {
     auth.onAuthStateChanged(async (user) => {
         try {
             if (!user) {
-                window.location.href = 'login.html';
+                window.location.href = 'signin.html';
                 return;
             }
 
@@ -1105,7 +1105,7 @@ function checkAuth() {
             if (!userData || userData.role !== 'instructor') {
                 // Not an instructor
                 await auth.signOut();
-                window.location.href = 'login.html';
+                window.location.href = 'signin.html';
                 return;
             }
 
@@ -1259,7 +1259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check authentication status
     auth.onAuthStateChanged(async (user) => {
         if (!user) {
-            window.location.href = 'login.html';
+            window.location.href = 'signin.html';
             return;
         }
 
@@ -1271,7 +1271,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!userData || userData.role !== 'instructor') {
                 await auth.signOut();
-                window.location.href = 'login.html';
+                window.location.href = 'signin.html';
                 return;
             }
 
@@ -1280,7 +1280,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Auth check error:', error);
             showToast('Error verifying credentials', 'error');
-            window.location.href = 'login.html';
+            window.location.href = 'signin.html';
         }
     });
 });
