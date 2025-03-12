@@ -1,0 +1,599 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iLearn - Sign Up</title>
+    <!-- Firebase SDKs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.js"></script>
+
+    <style>
+      /* Same styles as before */
+      @import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #0066cc, #4993ee, #66b3ff);
+        background-size: 200% 200%;
+        animation: gradientBG 15s ease infinite;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      @keyframes gradientBG {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 5%;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #0066cc;
+      }
+
+      .logo-img {
+        width: 30px;
+        height: 30px;
+        object-fit: contain;
+      }
+
+      .auth-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+      }
+
+      .auth-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 2.5rem;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+        animation: fadeIn 0.5s ease;
+      }
+
+      .auth-card h2 {
+        color: #1a365d;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-size: 1.8rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #4a5568;
+        font-weight: 500;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #4993ee;
+        box-shadow: 0 0 0 3px rgba(73, 147, 238, 0.2);
+      }
+
+      .submit-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(45deg, #1a365d, #2563eb);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .submit-btn:hover {
+        background: linear-gradient(45deg, #2563eb, #1a365d);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+      }
+
+      .auth-links {
+        text-align: center;
+        margin-top: 1.5rem;
+      }
+
+      .auth-links a {
+        color: #4993ee;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+
+      .auth-links a:hover {
+        color: #2563eb;
+      }
+
+      .social-login {
+        margin-top: 2rem;
+        text-align: center;
+      }
+
+      .social-login p {
+        color: #4a5568;
+        margin-bottom: 1rem;
+        position: relative;
+      }
+
+      .social-login p::before,
+      .social-login p::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 30%;
+        height: 1px;
+        background: #e2e8f0;
+      }
+
+      .social-login p::before {
+        left: 0;
+      }
+
+      .social-login p::after {
+        right: 0;
+      }
+
+      .social-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+      }
+
+      .social-btn {
+        padding: 0.75rem 1.5rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        background: white;
+        color: #4a5568;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .social-btn:hover {
+        background: #f8fafc;
+        border-color: #4993ee;
+        transform: translateY(-2px);
+      }
+
+      /* Role selector styles */
+      .role-selector {
+        margin-bottom: 2rem;
+      }
+
+      .role-title {
+        color: #4a5568;
+        margin-bottom: 1rem;
+        text-align: center;
+        font-weight: 500;
+      }
+
+      .role-options {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+      }
+
+      .role-option {
+        flex: 1;
+        cursor: pointer;
+      }
+
+      .role-option input[type="radio"] {
+        display: none;
+      }
+
+      .role-card {
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.5rem 1rem;
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+
+      .role-option input[type="radio"]:checked + .role-card {
+        border-color: #4993ee;
+        background: rgba(73, 147, 238, 0.05);
+        box-shadow: 0 4px 12px rgba(73, 147, 238, 0.1);
+      }
+
+      .role-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .role-label {
+        font-weight: 600;
+        color: #1a365d;
+        margin-bottom: 0.5rem;
+      }
+
+      .role-description {
+        font-size: 0.875rem;
+        color: #64748b;
+      }
+
+      .role-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .error-message {
+        color: #dc2626;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <a href="index.html" style="text-decoration: none">
+        <div class="logo">
+          <img
+            src="../assets/logo-icon.png"
+            alt="iLearn Logo"
+            class="logo-img"
+          />
+          iLearn
+        </div>
+      </a>
+    </nav>
+
+    <div class="auth-container">
+      <div class="auth-card">
+        <h2>Create Account</h2>
+        <div class="role-selector">
+          <p class="role-title">I want to register as:</p>
+          <div class="role-options">
+            <label class="role-option">
+              <input type="radio" name="role" value="student" checked />
+              <div class="role-card">
+                <div class="role-icon">👨‍🎓</div>
+                <div class="role-label">Student</div>
+                <div class="role-description">
+                  Join courses and start learning
+                </div>
+              </div>
+            </label>
+            <label class="role-option">
+              <input type="radio" name="role" value="instructor" />
+              <div class="role-card">
+                <div class="role-icon">👨‍🏫</div>
+                <div class="role-label">Instructor</div>
+                <div class="role-description">Create and teach courses</div>
+              </div>
+            </label>
+          </div>
+        </div>
+        <form id="signupForm">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              placeholder="Enter your full name"
+            />
+            <div id="nameError" class="error-message"></div>
+          </div>
+          <div class="form-group">
+            <label for="signup-email">Email</label>
+            <input
+              type="email"
+              id="signup-email"
+              name="email"
+              required
+              placeholder="Enter your email"
+            />
+            <div id="emailError" class="error-message"></div>
+          </div>
+          <div class="form-group">
+            <label for="signup-password">Password</label>
+            <input
+              type="password"
+              id="signup-password"
+              name="password"
+              required
+              placeholder="Create a password"
+              minlength="6"
+            />
+            <div id="passwordError" class="error-message"></div>
+          </div>
+          <div class="form-group">
+            <label for="confirm-password">Confirm Password</label>
+            <input
+              type="password"
+              id="confirm-password"
+              name="confirm-password"
+              required
+              placeholder="Confirm your password"
+            />
+            <div id="confirmPasswordError" class="error-message"></div>
+          </div>
+          <button type="submit" class="submit-btn">Sign Up</button>
+          <div class="auth-links">
+            Already have an account? <a href="signin.html">Sign In</a>
+          </div>
+          <div class="social-login">
+            <p>Or sign up with</p>
+            <div class="social-buttons">
+              <button type="button" class="social-btn" id="googleSignUp">
+                Google
+              </button>
+              <button type="button" class="social-btn" id="githubSignUp">
+                GitHub
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // Firebase configuration - Replace with your config
+      const firebaseConfig = {
+        apiKey: "AIzaSyDUZ9JQgfK4tx1dNZTKjpXdujWaazZTEOI",
+        authDomain: "ilearn-af4eb.firebaseapp.com",
+        databaseURL: "https://ilearn-af4eb-default-rtdb.firebaseio.com",
+        projectId: "ilearn-af4eb",
+        storageBucket: "ilearn-af4eb.firebasestorage.app",
+        messagingSenderId: "291415286107",
+        appId: "1:291415286107:web:3d85fef75c10f24d5ffa7e",
+        measurementId: "G-RDN0255N28",
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+
+      // Get references to auth and database
+      const auth = firebase.auth();
+      const database = firebase.database();
+
+      // Helper functions
+      function showError(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        errorElement.textContent = message;
+        errorElement.style.display = "block";
+      }
+
+      function clearErrors() {
+        const errorElements = document.getElementsByClassName("error-message");
+        Array.from(errorElements).forEach((element) => {
+          element.style.display = "none";
+          element.textContent = "";
+        });
+      }
+
+      function getSelectedRole() {
+        return document.querySelector('input[name="role"]:checked').value;
+      }
+
+      async function checkIfUserExists(email) {
+        try {
+          const methods = await auth.fetchSignInMethodsForEmail(email);
+          return methods.length > 0;
+        } catch (error) {
+          console.error("Error checking email existence:", error);
+          return false;
+        }
+      }
+
+      // Form submission handler
+      document
+        .getElementById("signupForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          clearErrors();
+
+          const name = document.getElementById("name").value;
+          const email = document.getElementById("signup-email").value;
+          const password = document.getElementById("signup-password").value;
+          const confirmPassword =
+            document.getElementById("confirm-password").value;
+          const role = getSelectedRole();
+
+          // Basic validation
+          if (password !== confirmPassword) {
+            showError("confirmPasswordError", "Passwords do not match");
+            return;
+          }
+
+          if (password.length < 6) {
+            showError(
+              "passwordError",
+              "Password must be at least 6 characters"
+            );
+            return;
+          }
+
+          try {
+            // Check if user exists
+            const userExists = await checkIfUserExists(email);
+            if (userExists) {
+              showError(
+                "emailError",
+                "This email is already registered. Please sign in instead."
+              );
+              setTimeout(() => {
+                window.location.href = "signin.html";
+              }, 2000);
+              return;
+            }
+
+            // Create user
+            const userCredential = await auth.createUserWithEmailAndPassword(
+              email,
+              password
+            );
+            const user = userCredential.user;
+
+            // Update profile
+            await user.updateProfile({
+              displayName: name,
+            });
+
+            // Store in database
+            await database.ref("users/" + user.uid).set({
+              email: user.email,
+              name: name,
+              role: role,
+              createdAt: firebase.database.ServerValue.TIMESTAMP,
+              lastLogin: firebase.database.ServerValue.TIMESTAMP,
+            });
+
+            // Redirect based on role
+            window.location.href =
+              role === "student" ? "student.html" : "instructor.html";
+          } catch (error) {
+            console.error(error);
+            switch (error.code) {
+              case "auth/email-already-in-use":
+                showError("emailError", "Email is already registered");
+                break;
+              case "auth/invalid-email":
+                showError("emailError", "Invalid email format");
+                break;
+              case "auth/weak-password":
+                showError("passwordError", "Password is too weak");
+                break;
+              default:
+                alert("Error: " + error.message);
+            }
+          }
+        });
+
+      // Google Sign Up
+      document
+        .getElementById("googleSignUp")
+        .addEventListener("click", async () => {
+          try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            const result = await auth.signInWithPopup(provider);
+
+            if (!result.additionalUserInfo.isNewUser) {
+              alert(
+                "This Google account is already registered. Redirecting to sign in..."
+              );
+              setTimeout(() => {
+                window.location.href = "signin.html";
+              }, 2000);
+              return;
+            }
+
+            const user = result.user;
+            const role = getSelectedRole();
+
+            // Store in database
+            await database.ref("users/" + user.uid).set({
+              email: user.email,
+              name: user.displayName,
+              role: role,
+              createdAt: firebase.database.ServerValue.TIMESTAMP,
+              lastLogin: firebase.database.ServerValue.TIMESTAMP,
+            });
+
+            // Redirect based on role
+            window.location.href =
+              role === "student" ? "student.html" : "instructor.html";
+          } catch (error) {
+            console.error(error);
+            alert("Error signing up with Google: " + error.message);
+          }
+        });
+
+      // GitHub Sign Up
+      document
+        .getElementById("githubSignUp")
+        .addEventListener("click", async () => {
+          try {
+            const provider = new firebase.auth.GithubAuthProvider();
+            const result = await auth.signInWithPopup(provider);
+
+            if (!result.additionalUserInfo.isNewUser) {
+              alert(
+                "This GitHub account is already registered. Redirecting to sign in..."
+              );
+              setTimeout(() => {
+                window.location.href = "signin.html";
+              }, 2000);
+              return;
+            }
+
+            const user = result.user;
+            const role = getSelectedRole();
+
+            // Store in database
+            await database.ref("users/" + user.uid).set({
+              email: user.email,
+              name: user.displayName,
+              role: role,
+              createdAt: firebase.database.ServerValue.TIMESTAMP,
+              lastLogin: firebase.database.ServerValue.TIMESTAMP,
+            });
+
+            // Redirect based on role
+            window.location.href =
+              role === "student" ? "student.html" : "instructor.html";
+          } catch (error) {
+            console.error(error);
+            alert("Error signing up with GitHub: " + error.message);
+          }
+        });
+    </script>
+  </body>
+</html>
