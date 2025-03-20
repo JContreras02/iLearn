@@ -1,3 +1,5 @@
+{% load static %}
+
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -375,21 +377,22 @@
       <a href="#" style="text-decoration: none">
         <div class="logo">
           <img
-            src="../assets/logo-icon.png"
+            src="{% static 'accounts/assets/logo-icon.png' %}"
             alt="iLearn Logo"
             class="logo-img"
           />
+
           iLearn
         </div>
       </a>
       <div class="nav-links">
         <a href="#">Home</a>
-        <a href="courses.html">Courses</a>
-        <a href="about.html">About</a>
+        <a href="{% url 'courses' %}">Courses</a>
+        <a href="{% url 'about' %}">About</a>
       </div>
       <div class="auth-buttons">
-        <a href="signin.html" class="btn btn-login">Login</a>
-        <a href="signup.html" class="btn btn-signup">Signup</a>
+        <a href="{% url 'signin' %}" class="btn btn-login">Login</a>
+        <a href="{% url 'signup' %}" class="btn btn-signup">Signup</a>
       </div>
     </nav>
 
@@ -397,7 +400,7 @@
       <div class="hero-content">
         <h1>Learn Without Limits</h1>
         <p>Access world-class education from anywhere, anytime</p>
-        <a href="signup.html" class="get-started">Get Started</a>
+        <a href="{% url 'signup' %}" class="get-started">Get Started</a>
       </div>
       <div class="hero-images">
         <div class="image-clip"></div>
@@ -475,7 +478,7 @@
 
     <section class="cta">
       <h2>Ready to start your learning journey?</h2>
-      <a href="courses.html" class="explore-btn">Explore Courses</a>
+      <a href="{% url 'courses' %}" class="explore-btn">Explore Courses</a>
     </section>
 
     <script>
@@ -486,7 +489,7 @@
           // Add a slight delay to see the hover effect before navigating
           e.preventDefault();
           setTimeout(() => {
-            window.location.href = "signup.html";
+            window.location.href = "{% url 'signup' %}";
           }, 200);
         });
       });

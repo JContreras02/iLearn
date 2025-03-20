@@ -1,0 +1,307 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iLearn - Sign Up</title>
+    <!-- Add your CSS styles here -->
+    <style>
+      /* Your existing styles */
+      @import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #0066cc, #4993ee, #66b3ff);
+        background-size: 200% 200%;
+        animation: gradientBG 15s ease infinite;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      @keyframes gradientBG {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 5%;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #0066cc;
+      }
+
+      .logo-img {
+        width: 30px;
+        height: 30px;
+        object-fit: contain;
+      }
+
+      .auth-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+      }
+
+      .auth-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 2.5rem;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+        animation: fadeIn 0.5s ease;
+      }
+
+      .auth-card h2 {
+        color: #1a365d;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-size: 1.8rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #4a5568;
+        font-weight: 500;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #4993ee;
+        box-shadow: 0 0 0 3px rgba(73, 147, 238, 0.2);
+      }
+
+      .submit-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(45deg, #1a365d, #2563eb);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .submit-btn:hover {
+        background: linear-gradient(45deg, #2563eb, #1a365d);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+      }
+
+      .auth-links {
+        text-align: center;
+        margin-top: 1.5rem;
+      }
+
+      .auth-links a {
+        color: #4993ee;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+
+      .auth-links a:hover {
+        color: #2563eb;
+      }
+
+      .error-message {
+        color: #dc2626;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        display: none;
+      }
+      .social-login {
+        margin-top: 2rem;
+        text-align: center;
+      }
+
+      .social-login p {
+        color: #4a5568;
+        margin-bottom: 1rem;
+        position: relative;
+      }
+
+      .social-login p::before,
+      .social-login p::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 30%;
+        height: 1px;
+        background: #e2e8f0;
+      }
+
+      .social-login p::before {
+        left: 0;
+      }
+      .social-login p::after {
+        right: 0;
+      }
+
+      .social-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+      }
+
+      .social-btn {
+        padding: 0.75rem 1.5rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        background: white;
+        color: #4a5568;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .social-btn:hover {
+        background: #f8fafc;
+        border-color: #4993ee;
+        transform: translateY(-2px);
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <a href="{% url 'home' %}" style="text-decoration: none">
+        <div class="logo">
+          <img
+            src="{% static 'accounts/assets/logo-icon.png' %}"
+            alt="iLearn Logo"
+            class="logo-img"
+          />
+          iLearn
+        </div>
+      </a>
+    </nav>
+
+    <div class="auth-container">
+      <div class="auth-card">
+        <h2>Create Account</h2>
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="id_username">Username</label>
+            <input type="text" name="username" id="id_username" required />
+            {% if form.username.errors %}
+            <div class="error-message">{{ form.username.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label for="id_email">Email</label>
+            <input type="email" name="email" id="id_email" required />
+            {% if form.email.errors %}
+            <div class="error-message">{{ form.email.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label for="id_password1">Password</label>
+            <input
+              type="password"
+              name="password1"
+              id="id_password1"
+              required
+            />
+            {% if form.password1.errors %}
+            <div class="error-message">{{ form.password1.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label for="id_password2">Confirm Password</label>
+            <input
+              type="password"
+              name="password2"
+              id="id_password2"
+              required
+            />
+            {% if form.password2.errors %}
+            <div class="error-message">{{ form.password2.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label for="id_role">Role</label>
+            <select name="role" id="id_role" required>
+              <option value="student">Student</option>
+              <option value="instructor">Instructor</option>
+            </select>
+            {% if form.role.errors %}
+            <div class="error-message">{{ form.role.errors }}</div>
+            {% endif %}
+          </div>
+          <button type="submit" class="submit-btn">Sign Up</button>
+        </form>
+        <div class="auth-links">
+          Already have an account? <a href="{% url 'signin' %}">Sign In</a>
+        </div>
+
+        <div class="social-login">
+          <p>Or continue with</p>
+          <div class="social-buttons">
+            <a
+              href="{% url 'social:begin' 'google-oauth2' %}"
+              class="social-btn"
+              >Google</a
+            >
+            <a href="{% url 'social:begin' 'github' %}" class="social-btn"
+              >GitHub</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -5,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>iLearn - Sign In</title>
     <style>
-      /* Your existing styles remain the same */
       @import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css");
 
       * {
@@ -254,7 +255,7 @@
       <a href="{% url 'home' %}" style="text-decoration: none">
         <div class="logo">
           <img
-            src="{{ static 'assets/logo-icon.png' }}"
+            src="{% static 'accounts/assets/logo-icon.png' %}"
             alt="iLearn Logo"
             class="logo-img"
           />
@@ -275,7 +276,7 @@
         </div>
         {% endif %}
 
-        <form id="loginForm" method="post" action="{% url 'login' %}">
+        <form id="loginForm" method="post" action="{% url 'signin' %}">
           {% csrf_token %}
           <div class="form-group">
             <label for="email">Email</label>
@@ -333,14 +334,11 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        // Form submission
         const form = document.getElementById("loginForm");
         form.addEventListener("submit", function (e) {
           const submitBtn = form.querySelector('button[type="submit"]');
           submitBtn.disabled = true;
           submitBtn.textContent = "Signing in...";
-
-          // Form will be submitted to server, no need for preventDefault
         });
       });
     </script>

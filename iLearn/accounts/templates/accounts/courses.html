@@ -1,3 +1,6 @@
+{% load static %}
+
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -309,10 +312,10 @@
   </head>
   <body>
     <nav class="navbar">
-      <a href="index.html" style="text-decoration: none">
+      <a href="{% url 'home' %}" style="text-decoration: none">
         <div class="logo">
           <img
-            src="../assets/logo-icon.png"
+            src="{% static 'accounts/assets/logo-icon.png' %}"
             alt="iLearn Logo"
             class="logo-img"
           />
@@ -320,13 +323,13 @@
         </div>
       </a>
       <div class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="courses.html">Courses</a>
-        <a href="about.html">About</a>
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'courses' %}">Courses</a>
+        <a href="{% url 'about' %}">About</a>
       </div>
       <div class="auth-buttons">
-        <a href="signin.html" class="btn btn-login">Login</a>
-        <a href="signup.html" class="btn btn-signup">Signup</a>
+        <a href="{% url 'signin' %}" class="btn btn-login">Login</a>
+        <a href="{% url 'signup' %}" class="btn btn-signup">Signup</a>
       </div>
     </nav>
 
@@ -396,7 +399,7 @@
 
       <main class="courses-container">
         <div class="courses-header">
-          <div class="courses-count">Showing 12 courses</div>
+          <div class="courses-count">Showing {{ courses|length }} courses</div>
           <select class="sort-select">
             <option value="popular">Most Popular</option>
             <option value="newest">Newest</option>
@@ -406,123 +409,63 @@
         </div>
 
         <div class="courses-grid">
-          <!-- Course Card 1 -->
+          {% for course in courses %}
           <div class="course-card">
-            <img
-              src="/api/placeholder/400/200"
-              alt="Course"
-              class="course-image"
-            />
+            <img src="{{ course.image }}" alt="Course" class="course-image" />
             <div class="course-info">
-              <span class="course-category">Web Development</span>
-              <h3 class="course-title">Complete Web Development Bootcamp</h3>
-              <p class="course-description">
-                Learn web development from scratch with HTML, CSS, JavaScript,
-                React, and Node.js.
-              </p>
+              <span class="course-category">{{ course.category }}</span>
+              <h3 class="course-title">{{ course.title }}</h3>
+              <p class="course-description">{{ course.description }}</p>
               <div class="course-meta">
-                <div class="course-rating">★ 4.8 (2.1k reviews)</div>
-                <div class="course-price">$89.99</div>
+                <div class="course-rating">
+                  ★ {{ course.rating }} ({{ course.reviews }} reviews)
+                </div>
+                <div class="course-price">${{ course.price }}</div>
               </div>
             </div>
             <button
               class="enroll-btn"
-              onclick="enrollCourse('Complete Web Development Bootcamp')"
+              onclick="enrollCourse('{{ course.title }}')"
             >
               Enroll Now
             </button>
           </div>
-
-          <!-- Course Card 2 -->
-          <div class="course-card">
-            <img
-              src="/api/placeholder/400/200"
-              alt="Course"
-              class="course-image"
-            />
-            <div class="course-info">
-              <span class="course-category">Data Science</span>
-              <h3 class="course-title">Python for Data Analysis</h3>
-              <p class="course-description">
-                Master data analysis with Python, Pandas, NumPy, and Matplotlib.
-              </p>
-              <div class="course-meta">
-                <div class="course-rating">★ 4.9 (1.8k reviews)</div>
-                <div class="course-price">$79.99</div>
-              </div>
-            </div>
-            <button
-              class="enroll-btn"
-              onclick="enrollCourse('Python for Data Analysis')"
-            >
-              Enroll Now
-            </button>
-          </div>
-
-          <!-- Course Card 3 -->
-          <div class="course-card">
-            <img
-              src="/api/placeholder/400/200"
-              alt="Course"
-              class="course-image"
-            />
-            <div class="course-info">
-              <span class="course-category">Design</span>
-              <h3 class="course-title">UI/UX Design Fundamentals</h3>
-              <p class="course-description">
-                Learn the principles of user interface and user experience
-                design.
-              </p>
-              <div class="course-meta">
-                <div class="course-rating">★ 4.7 (1.5k reviews)</div>
-                <div class="course-price">$69.99</div>
-              </div>
-            </div>
-            <button
-              class="enroll-btn"
-              onclick="enrollCourse('UI/UX Design Fundamentals')"
-            >
-              Enroll Now
-            </button>
-          </div>
+          {% endfor %}
         </div>
       </main>
     </div>
 
     <script>
       function enrollCourse(courseName) {
-        // Check if user is logged in (in a real app, this would be a backend check)
         const isLoggedIn = checkUserLogin();
-
         if (!isLoggedIn) {
           alert("Please log in to enroll in courses");
-          window.location.href = "signin.html";
+          window.location.href = "{% url 'signin' %}";
           return;
         }
-
         // Simulate adding course to student portal
         try {
-          let enrolledCourses =
-            JSON.parse(localStorage.getItem("enrolledCourses")) || [];
-
-          // Check if course is already enrolled
-          if (enrolledCourses.includes(courseName)) {
-            alert("You are already enrolled in this course");
-            return;
-          }
-
-          // Add course to enrolled courses
-          enrolledCourses.push(courseName);
-          localStorage.setItem(
-            "enrolledCourses",
-            JSON.stringify(enrolledCourses)
-          );
-
-          // Show success message
-          alert(`Successfully enrolled in: ${courseName}`);
-
-          // Redirect to student portal (in a real app, this would be a server-side operation)
-          window.location.href = "student.html";
+          fetch("{% url 'enroll_course' %}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: JSON.stringify({ course_name: courseName }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                alert(`Successfully enrolled in: ${courseName}`);
+                window.location.href = "{% url 'student_dashboard' %}";
+              } else {
+                alert(data.message || "Unable to enroll. Please try again.");
+              }
+            })
+            .catch((error) => {
+              console.error("Enrollment error:", error);
+              alert("Unable to enroll. Please try again.");
+            });
         } catch (error) {
           console.error("Enrollment error:", error);
           alert("Unable to enroll. Please try again.");
@@ -532,7 +475,7 @@
       function checkUserLogin() {
         // In a real application, this would be a secure backend authentication check
         // For this example, we'll use a simple localStorage flag
-        return localStorage.getItem("isLoggedIn") === "true";
+        return true;
       }
 
       // Optional: Add an event listener to handle login state
@@ -543,7 +486,7 @@
         if (loginStatus) {
           // Replace login/signup buttons with logout and profile
           authButtons.innerHTML = `
-            <a href="student-portal.html" class="btn btn-login">My Courses</a>
+            <a href="{% url 'student_dashboard' %}" class="btn btn-login">My Courses</a>
             <a href="#" class="btn btn-signup" onclick="logout()">Logout</a>
           `;
         }
@@ -551,7 +494,7 @@
 
       function logout() {
         localStorage.removeItem("isLoggedIn");
-        window.location.href = "index.html";
+        window.location.href = "{% url 'home' %}";
       }
     </script>
   </body>
