@@ -4,10 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>iLearn - Sign In</title>
-    <!-- Import Firebase SDKs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.js"></script>
     <style>
       /* Your existing styles remain the same */
       @import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css");
@@ -231,14 +227,34 @@
         margin-top: 0.5rem;
         display: none;
       }
+
+      .messages {
+        margin-bottom: 1rem;
+      }
+
+      .message {
+        padding: 0.5rem 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 5px;
+      }
+
+      .message.error {
+        background-color: #fee2e2;
+        color: #b91c1c;
+      }
+
+      .message.success {
+        background-color: #d1fae5;
+        color: #047857;
+      }
     </style>
   </head>
   <body>
     <nav class="navbar">
-      <a href="index.html" style="text-decoration: none">
+      <a href="{% url 'home' %}" style="text-decoration: none">
         <div class="logo">
           <img
-            src="../assets/logo-icon.png"
+            src="{{ static 'assets/logo-icon.png' }}"
             alt="iLearn Logo"
             class="logo-img"
           />
@@ -250,7 +266,17 @@
     <div class="auth-container">
       <div class="auth-card">
         <h2>Welcome Back</h2>
-        <form id="loginForm">
+
+        {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+          <div class="message {{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <form id="loginForm" method="post" action="{% url 'login' %}">
+          {% csrf_token %}
           <div class="form-group">
             <label for="email">Email</label>
             <input
@@ -260,7 +286,11 @@
               required
               placeholder="Enter your email"
             />
-            <div id="emailError" class="error-message"></div>
+            {% if form.email.errors %}
+            <div class="error-message" style="display: block">
+              {{ form.email.errors }}
+            </div>
+            {% endif %}
           </div>
           <div class="form-group">
             <label for="password">Password</label>
@@ -271,24 +301,30 @@
               required
               placeholder="Enter your password"
             />
-            <div id="passwordError" class="error-message"></div>
+            {% if form.password.errors %}
+            <div class="error-message" style="display: block">
+              {{ form.password.errors }}
+            </div>
+            {% endif %}
           </div>
           <div class="forgot-password">
-            <a href="#forgot-password">Forgot Password?</a>
+            <a href="{% url 'password_reset' %}">Forgot Password?</a>
           </div>
           <button type="submit" class="submit-btn">Sign In</button>
           <div class="auth-links">
-            Don't have an account? <a href="signup.html">Sign Up</a>
+            Don't have an account? <a href="{% url 'signup' %}">Sign Up</a>
           </div>
           <div class="social-login">
             <p>Or continue with</p>
             <div class="social-buttons">
-              <button type="button" class="social-btn" id="googleSignIn">
-                Google
-              </button>
-              <button type="button" class="social-btn" id="githubSignIn">
-                GitHub
-              </button>
+              <a
+                href="{% url 'social:begin' 'google-oauth2' %}"
+                class="social-btn"
+                >Google</a
+              >
+              <a href="{% url 'social:begin' 'github' %}" class="social-btn"
+                >GitHub</a
+              >
             </div>
           </div>
         </form>
@@ -296,226 +332,17 @@
     </div>
 
     <script>
-      // Firebase configuration - Replace with your config
-      const firebaseConfig = {
-        apiKey: "AIzaSyDUZ9JQgfK4tx1dNZTKjpXdujWaazZTEOI",
-        authDomain: "ilearn-af4eb.firebaseapp.com",
-        databaseURL: "https://ilearn-af4eb-default-rtdb.firebaseio.com",
-        projectId: "ilearn-af4eb",
-        storageBucket: "ilearn-af4eb.firebasestorage.app",
-        messagingSenderId: "291415286107",
-        appId: "1:291415286107:web:3d85fef75c10f24d5ffa7e",
-        measurementId: "G-RDN0255N28",
-      };
-
-      // Initialize Firebase
-      firebase.initializeApp(firebaseConfig);
-
-      // Get references to auth and database
-      const auth = firebase.auth();
-      const database = firebase.database();
-
-      // Form submission handler
-      document
-        .getElementById("loginForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-
-          const email = document.getElementById("email").value;
-          const password = document.getElementById("password").value;
-
-          try {
-            const userCredential = await auth.signInWithEmailAndPassword(
-              email,
-              password
-            );
-            const user = userCredential.user;
-
-            // Check user role from database
-            const userRef = database.ref("users/" + user.uid);
-            const snapshot = await userRef.once("value");
-            const userData = snapshot.val();
-
-            // Update last login
-            await userRef.update({
-              lastLogin: firebase.database.ServerValue.TIMESTAMP,
-              email: user.email,
-            });
-
-            // Redirect based on user role
-            if (userData && userData.role === "instructor") {
-              window.location.href = "instructor.html";
-            } else {
-              // Default to student if no role or role is student
-              window.location.href = "student.html";
-            }
-          } catch (error) {
-            console.error(error);
-            // Handle specific error cases
-            switch (error.code) {
-              case "auth/invalid-email":
-                document.getElementById("emailError").textContent =
-                  "Invalid email format";
-                document.getElementById("emailError").style.display = "block";
-                break;
-              case "auth/user-not-found":
-                document.getElementById("emailError").textContent =
-                  "User not found";
-                document.getElementById("emailError").style.display = "block";
-                break;
-              case "auth/wrong-password":
-                document.getElementById("passwordError").textContent =
-                  "Incorrect password";
-                document.getElementById("passwordError").style.display =
-                  "block";
-                break;
-              default:
-                alert("Error: " + error.message);
-            }
-          }
-        });
-
-      // Google Sign In
-      document
-        .getElementById("googleSignIn")
-        .addEventListener("click", async () => {
-          const provider = new firebase.auth.GoogleAuthProvider();
-          try {
-            const result = await auth.signInWithPopup(provider);
-            const user = result.user;
-
-            // Check if user exists
-            const userRef = database.ref(`users/${user.uid}`);
-            const snapshot = await userRef.get();
-            const userData = snapshot.val();
-
-            if (userData && userData.role) {
-              // User exists, update last login
-              await userRef.update({
-                lastLogin: firebase.database.ServerValue.TIMESTAMP,
-                email: user.email,
-                name: user.displayName,
-              });
-
-              // Redirect based on role
-              window.location.href =
-                userData.role === "instructor"
-                  ? "instructor.html"
-                  : "student.html";
-            } else {
-              // New user - set as student by default
-              await userRef.set({
-                email: user.email,
-                name: user.displayName,
-                role: "student",
-                lastLogin: firebase.database.ServerValue.TIMESTAMP,
-                createdAt: firebase.database.ServerValue.TIMESTAMP,
-              });
-
-              window.location.href = "student.html";
-            }
-          } catch (error) {
-            console.error(error);
-            alert("Error signing in with Google: " + error.message);
-          }
-        });
-
-      // GitHub Sign In
-      document
-        .getElementById("githubSignIn")
-        .addEventListener("click", async () => {
-          const provider = new firebase.auth.GithubAuthProvider();
-          try {
-            const result = await auth.signInWithPopup(provider);
-            const user = result.user;
-
-            // Check if user exists and has a role
-            const userRef = database.ref("users/" + user.uid);
-            const snapshot = await userRef.once("value");
-            const userData = snapshot.val();
-
-            if (userData && userData.role === "instructor") {
-              // Update existing instructor's last login
-              await userRef.update({
-                email: user.email,
-                name: user.displayName,
-                lastLogin: firebase.database.ServerValue.TIMESTAMP,
-              });
-              window.location.href = "instructor.html";
-            } else {
-              // New user or existing student - ensure student role
-              await userRef.set({
-                email: user.email,
-                name: user.displayName,
-                role: "student",
-                lastLogin: firebase.database.ServerValue.TIMESTAMP,
-                createdAt: userData
-                  ? userData.createdAt
-                  : firebase.database.ServerValue.TIMESTAMP,
-              });
-              window.location.href = "student.html";
-            }
-          } catch (error) {
-            console.error(error);
-            alert("Error signing in with GitHub: " + error.message);
-          }
-        });
-
-      // Add to login form submit handler
-      document
-        .getElementById("loginForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const submitBtn = e.target.querySelector('button[type="submit"]');
+      document.addEventListener("DOMContentLoaded", function () {
+        // Form submission
+        const form = document.getElementById("loginForm");
+        form.addEventListener("submit", function (e) {
+          const submitBtn = form.querySelector('button[type="submit"]');
           submitBtn.disabled = true;
           submitBtn.textContent = "Signing in...";
 
-          try {
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            await auth.signInWithEmailAndPassword(email, password);
-
-            // Check user role after successful login
-            const user = auth.currentUser;
-            const userRef = database.ref(`users/${user.uid}`);
-            const snapshot = await userRef.get();
-            const userData = snapshot.val();
-
-            if (userData && userData.role === "instructor") {
-              window.location.href = "instructor.html";
-            } else {
-              window.location.href = "student.html";
-            }
-          } catch (error) {
-            console.error(error);
-            document.getElementById("emailError").textContent = "";
-            document.getElementById("passwordError").textContent = "";
-
-            switch (error.code) {
-              case "auth/invalid-email":
-                document.getElementById("emailError").textContent =
-                  "Invalid email format";
-                document.getElementById("emailError").style.display = "block";
-                break;
-              case "auth/user-not-found":
-                document.getElementById("emailError").textContent =
-                  "User not found";
-                document.getElementById("emailError").style.display = "block";
-                break;
-              case "auth/wrong-password":
-                document.getElementById("passwordError").textContent =
-                  "Incorrect password";
-                document.getElementById("passwordError").style.display =
-                  "block";
-                break;
-              default:
-                alert("Error: " + error.message);
-            }
-          } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = "Sign In";
-          }
+          // Form will be submitted to server, no need for preventDefault
         });
+      });
     </script>
   </body>
 </html>
